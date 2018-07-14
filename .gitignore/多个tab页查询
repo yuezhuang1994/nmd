@@ -1,0 +1,241 @@
+-- -------------------------------------
+controller
+/**
+	 * 列表
+	 */
+	@RequestMapping(value = "/list", method = RequestMethod.GET)
+	public String list(HttpServletRequest request,Model model) {
+		model.addAttribute("tabIndex", request.getParameter("tabIndex"));
+		
+    //所有的状态
+		JSONArray statusAry = BaseEnum.getEnumList(JcOrder.SupplierStatus.class);
+		//添加一个全部状态
+    JSONObject allObject = new JSONObject();
+		allObject.put("code", "ALL");
+		allObject.put("label", "全部");
+		statusAry.add(0, allObject);
+		//保存
+    model.addAttribute("statusAry", statusAry.toString());
+		return "jc/supplier_order/list";
+	}
+
+-- ---------------------------------------
+
+jsp 页面
+<jsp:include page="../include/dialog.jsp"></jsp:include>
+	<jsp:include page="../include/include_js.jsp"></jsp:include>
+	<script type="text/javascript"></script>
+    <script type="text/javascript" src="<%=request.getContextPath()%>/js/angular.min.js"></script>
+	<script type="text/javascript" src="<%=request.getContextPath()%>/js/nmd.pagination.js"></script>
+	<script type="text/javascript" src="<%=request.getContextPath()%>/bootstrapFrame/My97DatePicker/WdatePicker.js"></script>
+	<script type="text/javascript" src="<%=request.getContextPath()%>/js/common/common.20170215.js<%=application.getAttribute("suffix")%>"></script>
+	<script type="text/javascript" src="<%=request.getContextPath()%>/js/common/template.js"></script>
+	<script type="text/javascript" src="<%=request.getContextPath()%>/js/common/template.helper.js"></script>	
+	<script type="text/javascript" src="<%=request.getContextPath()%>/static/jc/js_new/buyer_order/list.js<%=application.getAttribute("suffix")%>"></script>
+	
+  
+  //取值 并 设置 全部变量 statusAry
+  <script type="text/javascript">
+	var tabIndex='';
+	var statusAry = ${statusAry};
+	</script>
+  
+  -- --------------------------------------------
+  js文件
+  
+  var path = $("#path").val();
+	/**1.回车搜索**/
+	$scope.keyupSearch = function($event,status){
+		if($event.keyCode ==13){
+			$scope.search(status);
+		}
+	}
+  
+  /**
+	 * 2.查询
+	 * **/
+	$scope.search = function(status){
+		var type = null;
+		$scope.orderby(status,type);
+	}
+  
+  /**
+	 * 3.排序
+	 * **/
+	$scope.orderby = function(status,type){
+		var orderStr = "";
+		$scope.loadData(status,orderStr);
+	}
+  
+  /**4.加载列表数据**/
+	$scope.loadData = function(status,orderBy){
+		var page = 1;
+		if($scope[status+'PaginationConf']
+			&&$scope[status+'PaginationConf'].currentPage){
+			page = $scope[status+'PaginationConf'].currentPage;
+		}
+
+	    var postData = {
+	    		status : status ,
+	    		supplierName : $('#'+status+'SupplierName').val(),
+	    		systemNo : $('#'+status+'SystemNo').val(),
+	    		page : page,
+	    		orderBy :orderBy
+	    }
+	    transFn = function(data) {
+           return $.param(data);
+	    };
+       	postCfg = {
+           headers: {
+               'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+           },
+           transformRequest: transFn
+       	};
+	    $http.post("/jc/buyer_order/listData", postData, postCfg).success(function(response) {
+	    	$scope[status+'PaginationConf'] = {
+	                 currentPage: response.result.page,
+	                 totalItems: response.result.total,
+	                 itemsPerPage: response.result.perPage,		
+	                 data : response.result.data,
+	                 onChange: function() {
+	                   	 if (response.result.page != $scope[status+'PaginationConf'].currentPage && $scope[status+'PaginationConf'].currentPage != 0) {
+	                   	     $scope.search(status);
+	                   	     $(window).scrollTop(0);
+	                   	 }      	                    	
+	                }	
+			}
+	    	$('a[href="#'+status+'Tab"]').find("span").first().text($scope[status+'PaginationConf'].totalItems);
+	    	
+    		var html = template('trTemplate', response.result);
+ 	 		$('#'+status+"Container").html($compile(html)($scope));
+ 	 		
+ 	 		showTip("div .cont","data-value");
+	    }).error(function(data, status, headers, config) {
+	    	showError('查询失败，请联系管理员协助处理');
+	    });
+	}
+  
+  
+  //初始化
+  /**
+	 * 5.全部查询
+	 * **/
+	$scope.allSearch = function(){
+		for(var i=0;i<statusAry.length;i++){
+			$scope[statusAry[i].code+'PaginationConf']={
+					currentPage : 1,
+		            totalItems : 0,
+		            itemsPerPage : 10,
+		            data : null
+			};
+			$scope.search(statusAry[i].code);
+		}
+	};
+ 
+  //引用$timeout服务，异步执行JQuery的初始化代码
+	$timeout(function(){
+    
+    //根据页面中的statusAry 来渲染 模板
+		var pageHtml = template('tabTemplate', {statusAry : statusAry});
+		$('#pageContainer').html($compile(pageHtml)($scope));
+	    
+      //因为模板不支持 进行 # 拼接
+      $("a[data-toggle='tab']").each(function (index,element) {
+			$(element).attr('href','#'+$(element).attr('href'));
+	    });
+	    
+      //进行tab页的切换*****
+	    if(tabIndex){
+	    	$('#navUl a:eq('+tabIndex+')').tab('show');
+	    }else{
+	    	$('#navUl a:eq(0)').tab('show');
+	    }
+	    
+	    //主要的初始化方法
+	    $scope.allSearch();
+	    
+		
+	}, 0); 
+  
+  
+  ***js执行顺序
+  页面中的js代码--->$timeout方法 --->
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  注意:
+  模板渲染后 
+  
+  <div class="nav-tabs-custom">
+	<ul class="nav nav-tabs" id="navUl">
+		
+		
+		<li><a href="ALLTab" data-toggle="tab" class="tabs-sub">全部(<span></span>)</a></li>
+		
+		<li><a href="WAIT_CONFIRMTab" data-toggle="tab" class="tabs-sub">待确认(<span></span>)</a></li>
+		
+		<li><a href="WAIT_PAYTab" data-toggle="tab" class="tabs-sub">待付款(<span></span>)</a></li>
+		
+		<li><a href="WAIT_SENDTab" data-toggle="tab" class="tabs-sub">待发货(<span></span>)</a></li>
+		
+		<li><a href="WAIT_RECEIVETab" data-toggle="tab" class="tabs-sub">待收货(<span></span>)</a></li>
+		
+		<li><a href="WAIT_EVALUATIONTab" data-toggle="tab" class="tabs-sub">待评价(<span></span>)</a></li>
+		
+		<li><a href="FINISHEDTab" data-toggle="tab" class="tabs-sub">已完成(<span></span>)</a></li>
+		
+		<li><a href="CLOSEDTab" data-toggle="tab" class="tabs-sub">已关闭(<span></span>)</a></li>
+		
+		
+	</ul>
+	<div class="tab-content" id="navContent">
+		
+		
+		<div class="tab-pane" id="ALLTab">
+			<form method="post">
+
+                                <div class="row">
+                                    <div class="float-right">
+                                        <label class="searchTitle float-left">供应商</label>
+                                        <input type="text" class="form-control searchInput" id="ALLSupplierName" name="txt-search" placeholder="请输入供应商的企业名称" />
+                                        <button class="btn btn-normal" ng-click="search('ALL');">查询结果</button>
+                                    </div>
+                                    <div class="float-right selectDiv">
+                                        <label class="searchTitle float-left">订单编号</label>
+                                        <input type="text" class="form-control searchInput" id="ALLSystemNo" name="txt-search" placeholder="请输入订单编号" />
+                                    </div>
+                                </div>
+
+			</form>
+			<p class="p-sifting">筛选结果&nbsp;:&emsp;搜索到  <span class="color-orange" ng-cloak ng-bind="ALLPaginationConf.totalItems"></span> 条相关信息</p>
+			<div class="table-body">
+				<table class="table table-bordered data-table defaultTable">
+					<thead>
+                                        <tr>
+                                            <th class="th-w-2">订单编号<a href="javascript:void(0);" class="sort"></a></th>
+                                            <th class="th-w-1-5">确认时间</th>
+                                            <th class="th-w-1-5">下单用户</th>
+                                            <th class="th-w-2">供应商<a href="javascript:void(0);" class="sort"></a></th>
+                                            <th class="th-w-1-5">订单金额</th>
+                                            <th class="th-w-1">订单状态</th>
+                                            <th class="th-w-1-5">操作</th>
+                                        </tr>
+					</thead>
+					<tbody id="ALLContainer">
+						
+					</tbody>
+				</table>
+				<p ng-cloak ng-if="ALLPaginationConf.totalItems==0" class="align-center nodata">没有找到匹配数据</p>
+			</div>
+			<nmd-pagination conf="ALLPaginationConf"></nmd-pagination>
+		</div>
