@@ -1,0 +1,53 @@
+-----controller 
+
+/**
+	 * 明细页面
+	 */
+	@RequestMapping(value = "/{id:^\\d+$}/detail", method = RequestMethod.GET)
+	public String detail(HttpServletRequest request,@PathVariable("id") Long id,Model model) {
+		if(id!=null){
+			QueryForm queryForm = getQueryForm(request);
+			UserModel userModel = getCurrentUserModel();
+			JcOrder jcOrder = jcOrderService.find(id);
+			if(jcOrder!=null
+					&&(userModel.getCompanyId().longValue()==jcOrder.getSupplierId().longValue())){
+				JcOrderModel jcOrderModel = jcOrderService.load(id);
+				jcOrderModel.setOrderRole(JcOrderModel.OrderRole.SUPPLIER);
+				JcCompanyInvoiceModel jcCompanyInvoiceModel = jcCompanyInvoiceService.getJcCompanyInvoiceByCompanyId(jcOrderModel.getSupplierId());
+				model.addAttribute("jcCompanyInvoiceModel", jcCompanyInvoiceModel == null ? new JcCompanyInvoiceModel():jcCompanyInvoiceModel);
+				//jcOrderModel = jcOrderService.loadDetail(jcOrderModel,userModel);
+				model.addAttribute("jcOrder", JsonUtil.dump(jcOrderModel));
+				
+				return "jc/buyer_order/detail";
+			}
+		}
+		return "redirect:/jc/no_permission";	
+	}
+  
+  ----jsp页面
+  ps:进行全局变量的赋值
+  
+  <script type="text/javascript">
+	var jcOrder = ${jcOrder};
+	if(jcOrder.orderRole == 'BUYER'){
+    //主链接 的设置
+		$("#jcOrderDetailLink").attr("href","/jc/buyer_order/list");
+		$("#jcOrderDetailLink").parent().prev().find("a").first().attr("href","/jc/buyer_product_match/list");
+	}else if(jcOrder.orderRole == 'SUPPLIER'){
+		$("#jcOrderDetailLink").attr("href","/jc/supplier_order/list");
+		$("#jcOrderDetailLink").parent().prev().find("a").first().attr("href","/jc/supplier_product/list");
+	}
+	</script>
+  
+  ------js页面
+  1.全局变量
+    var path = $("#path").val();
+    $scope.jcOrder = jcOrder;
+    
+    var orderRole="";   //订单角色
+    var orderStatus=""; //订单状态
+    var lowerOrderRole = "";  //小写 订单角色
+  2.初始化
+  $scope.postRequest("/jc/buyer_order/"+$scope.jcOrder.id+"/info",null,$scope.getJcOrderDetailData);
+	 $scope.postRequest("/jc/buyer_order/"+$scope.jcOrder.id+"/getJcOrderLog",null,$scope.getJcOrderLog);
+  
