@@ -1,3 +1,21 @@
+一 为什么需要AOP
+假如应用中有n个业务逻辑组件 , 每个组件又有n个方法.现在有这样一个 需求 , 每个方法都增加一个通用的功能,如事务处理 , 日志 , 权限控制
+用AOP的方式实现不修改 源代码的方式 可以为很多方法增加横切性质的 '通用处理'
+二 什么是AOP
+Aspect-OrientedProgramming，面向方面编程 , 可以说是OOP（Object-Oriented Programing，面向对象编程）的补充和完善。
+
+那问题来了，AOP是在什么时候去改我们的代码的？即给我们加上额外的横切性质的"通用处理"的？
+
+两个时机：
+
+1.在编译java源代码的时候 ----编译时增强
+2.在运行时动态地修改类 ----运行时增强（动态代理）
+
+我们的Spring的AOP的实现原理就是基于动态代理。
+
+
+
+
 1、@component （把普通pojo实例化到spring容器中，相当于配置文件中的<bean id="" class=""/>）
   @Aspect     //让这个类具有AOP功能
   
@@ -7,6 +25,10 @@
   这个注解完整的说明了，应该在函数的什么位置插入变化，也就是所谓的切点
   这里引入了ProceedingJoinPoint，在使用了@Around之后可以带入这个参数，代表的其实就是sayHello这个函数，不过做了一些封装 
   而 Object re = pjp.proceed(); 就是相当于执行了 saveJcOrderInvoice 方法！
+  
+  定义切点表达式
+  @Around("execution(* com.hms.jc.service.类名.方法名(..))")
+  
   (2)增强: 
   我们把这个函数体，也就是定义了要做那些事情的代码，称作增强
   (3)切面
@@ -27,11 +49,11 @@ public class JcOrderLogAop {
 	private static Logger log = LoggerFactory.getLogger(JcOrderLogAop.class);
 	@Inject
   private DB db;
-    
+   
     /**
 	 * 供应商修改订单发票信息
 	 * **/
-	@Around("execution(* com.hms.jc.service.JcOrderInvoiceService.saveJcOrderInvoice(..))")
+    @Around("execution(* com.hms.jc.service.JcOrderInvoiceService.saveJcOrderInvoice(..))")
     public Object saveJcOrderInvoice(ProceedingJoinPoint pjp) throws Throwable{
 		  final Object[] args = pjp.getArgs();
     	final Object result = pjp.proceed();
