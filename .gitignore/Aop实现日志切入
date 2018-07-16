@@ -1,0 +1,48 @@
+1、@component （把普通pojo实例化到spring容器中，相当于配置文件中的<bean id="" class=""/>）
+  @Aspect     //让这个类具有AOP功能
+  
+  
+  (1)切点:
+  @Around  表示包围一个函数，也就是可以在函数执行前做一些事情，也可以在函数执行后做一些事情,
+  这个注解完整的说明了，应该在函数的什么位置插入变化，也就是所谓的切点
+  这里引入了ProceedingJoinPoint，在使用了@Around之后可以带入这个参数，代表的其实就是sayHello这个函数，不过做了一些封装 
+  而 Object re = pjp.proceed(); 就是相当于执行了 saveJcOrderInvoice 方法！
+  (2)增强: 
+  我们把这个函数体，也就是定义了要做那些事情的代码，称作增强
+  (3)切面
+  而包含切点和增强结合起来就称作切面 
+  
+注意
+Spring只支持XML方式而没有实现注解的方式（也叫AspectJ方式）的AOP，所以要使用@Aspect注解，
+使用aspectj处理拦截aop，需要获取实现类接口上的注解,ProceedingJoinPoint获取实现类接口上的注解,,该类是JoinPoint的子接口
+
+final Object[] args = pjp.getArgs();  //获取参数
+final Object result = pjp.proceed();  //让目标方法执行
+
+-- 
+@Component    //交给容器管理
+@Aspect     //让这个类具有AOP功能
+public class JcOrderLogAop {
+
+	private static Logger log = LoggerFactory.getLogger(JcOrderLogAop.class);
+	@Inject
+  private DB db;
+    
+    /**
+	 * 供应商修改订单发票信息
+	 * **/
+	@Around("execution(* com.hms.jc.service.JcOrderInvoiceService.saveJcOrderInvoice(..))")
+    public Object saveJcOrderInvoice(ProceedingJoinPoint pjp) throws Throwable{
+		  final Object[] args = pjp.getArgs();
+    	final Object result = pjp.proceed();
+		try {
+			JcOrderInvoiceModel jcOrderInvoiceModel = (JcOrderInvoiceModel)args[0];
+			UserModel userModel = (UserModel)args[1];
+			
+	    	addJcOrderLog(jcOrderInvoiceModel.getId(),userModel,BaseEnum.LogType.SUPPLIER_EDIT_INVOICE,false);
+		} catch (Exception e) {
+        	log.error(e.getMessage());
+		}
+    	return result;
+    } 
+  
