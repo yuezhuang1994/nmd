@@ -16,3 +16,5 @@ $('#myTab a').click(function (e) {
 2.激活标签页(展示)
 
 $('#').tab('show')
+
+
