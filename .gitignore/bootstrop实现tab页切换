@@ -1,0 +1,18 @@
+1.通过两种方式启动标签页 
+
+(1)通过data 属性 您需要添加 data-toggle="tab" 或 data-toggle="pill" 到锚文本链接中
+添加 nav 和 nav-tabs 类到 ul 中，将会应用 Bootstrap 标签样式，添加 nav 和 nav-pills 类到 ul 中，将会应用 Bootstrap 胶囊式样式。
+<ul class="nav nav-tabs">
+    <li><a href="#identifier" data-toggle="tab">Home</a></li>
+    ...
+</ul>
+
+(2) 通过JavaScript  
+$('#myTab a').click(function (e) {
+  e.preventDefault()
+  $(this).tab('show')
+})
+
+2.激活标签页(展示)
+
+$('#').tab('show')
