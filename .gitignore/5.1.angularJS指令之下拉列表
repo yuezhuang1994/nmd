@@ -1,0 +1,167 @@
+一 使用指令 可以代码通用
+
+angular
+		.module('nmd.catalogSelect', [])
+		.directive(
+				'nmdCatalogSelect',
+				[
+						"$http",
+						function($http) {
+							return {
+								restrict : 'EA',
+								template : '<div>'
+										+ '<div class="d-search-date">'
+										+ '	<select name="catalogId" ng-model="conf.thirdCatalog" ng-change="changeCatalog();" class="form-control">'
+										+ '		<option value="">选择小类</option>'
+										+ '		<option ng-repeat="thirdCatalogTmp in conf.thirdCatalogData" value="{{thirdCatalogTmp.id}}">{{thirdCatalogTmp.name}}</option>'
+										+ '	</select>'
+										+ '</div>'
+										+ '<div class="d-search-date">'
+										+ '	<select name="secondCatalogId" ng-model="conf.secondCatalog" ng-change="fetchThirdCatalogData();" class="form-control">'
+										+ '		<option value="">选择子类</option>'
+										+ '		<option ng-repeat="secondCatalogTmp in conf.secondCatalogData" value="{{secondCatalogTmp.id}}">{{secondCatalogTmp.name}}</option>'
+										+ '	</select>'
+										+ '</div>'
+										+ '<div class="d-search-date">'
+										+ '	<select name="firstCatalogId" ng-model="conf.firstCatalog" ng-change="fetchSecondCatalogData();" class="form-control">'
+										+ '		<option value="">选择大类</option>'
+										+ '		<option ng-repeat="firstCatalogTmp in conf.firstCatalogData" value="{{firstCatalogTmp.id}}">{{firstCatalogTmp.name}}</option>'
+										+ '	</select>'
+										+ '</div>'
+										+ '<div class="d-search-date">'
+										+ '	<select name="industryId" ng-model="conf.industry" ng-change="fetchFirstCatalogData();" class="form-control">'
+										+ '		<option value="">选择行业</option>'
+										+ '		<option ng-repeat="industryTmp in conf.industryData" value="{{industryTmp.id}}">{{industryTmp.name}}</option>'
+										+ '	</select>' + '</div>' + '</div>',
+								replace : true,
+								scope : {
+									conf : '='
+								},
+								link : function(scope, instanceElement,
+										instanceAttrs) {
+
+									scope.conf = {
+										industry : '',
+										industryData : {},
+										firstCatalog : '',
+										firstCatalogData : {},
+										secondCatalog : '',
+										secondCatalogData : {},
+										thirdCatalog : '',
+										thirdCatalogData : {},
+										param : ''
+									};
+
+									// 加载行业数据
+									$http({
+										method : 'GET',
+										url : '/api/catalog/getIndustryData'
+									})
+											.then(
+													function successCallback(
+															response) {
+														// 绑定行业数据
+														if (response.data.status = '000000') {
+															scope.conf.industryData = response.data.result;
+														}
+													},
+													function errorCallback(
+															response) {
+														showError('初始化行业失败数据，请联系系统管理员协助处理');
+													});
+
+									/*******************************************
+									 * 行业变更加载主营业务
+									 ******************************************/
+									scope.fetchFirstCatalogData = function() {
+										// mark 行业改变时清空大类，否则大类会出现空行
+										scope.conf.firstCatalog = '';
+										scope.conf.firstCatalogData = {};
+										scope.conf.secondCatalog = '';
+										scope.conf.secondCatalogData = {};
+										scope.conf.thirdCatalog = '';
+										scope.conf.thirdCatalogData = {};
+										scope.conf.param = ('&industryId=' + scope.conf.industry);
+
+										if (scope.conf.industry) {
+											// 加载行业,无法通过data赋值
+											$http
+													.post(
+															'/api/catalog/getIndustryCatalogData?industryId='
+																	+ scope.conf.industry,
+															{})
+													.then(
+															function(response) {
+																if (response.data.status = '000000') {
+																	scope.conf.firstCatalogData = response.data.result;
+																} else {
+																	showError("查询主营业务数据失败，请联系系统管理员协助处理");
+																}
+															},
+															function(response) {
+																showError("查询主营业务数据失败，请联系系统管理员协助处理");
+															});
+										}
+									}
+
+									/*******************************************
+									 * 大类变更时加载子类
+									 ******************************************/
+									scope.fetchSecondCatalogData = function() {
+										scope.conf.secondCatalog = '';
+										scope.conf.secondCatalogData = {};
+										scope.conf.thirdCatalog = '';
+										scope.conf.thirdCatalogData = {};
+										scope.conf.param = ('&industryId='
+												+ scope.conf.industry
+												+ '&firstCatalogId=' + scope.conf.firstCatalog);
+
+										if (scope.conf.firstCatalog) {
+											$http
+													.get(
+															"/api/catalog/getCatalogData?pid="
+																	+ scope.conf.firstCatalog)
+													.success(
+															function(response) {
+																scope.conf.secondCatalogData = response.result;
+															});
+										}
+									};
+
+									/** 子类变更时加载小类* */
+									scope.fetchThirdCatalogData = function() {
+										scope.conf.thirdCatalog = '';
+										scope.conf.thirdCatalogData = {};
+										scope.conf.param = ('&industryId='
+												+ scope.conf.industry
+												+ '&firstCatalogId='
+												+ scope.conf.firstCatalog
+												+ '&secondCatalogId=' + scope.conf.secondCatalog);
+
+										if (scope.conf.secondCatalog) {
+											$http
+													.get(
+															"/api/catalog/getCatalogData?pid="
+																	+ scope.conf.secondCatalog)
+													.success(
+															function(response) {
+																scope.conf.thirdCatalogData = response.result;
+															});
+										}
+									};
+
+									/** 小类变更* */
+									scope.changeCatalog = function() {
+										scope.conf.param = ('&industryId='
+												+ scope.conf.industry
+												+ '&firstCatalogId='
+												+ scope.conf.firstCatalog
+												+ '&secondCatalogId='
+												+ scope.conf.secondCatalog
+												+ '&catalogId=' + scope.conf.thirdCatalog);
+									};
+
+								}
+							};
+} ]);
+
