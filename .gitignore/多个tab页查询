@@ -1,3 +1,72 @@
+--------------------
+entity 
+@Table(name = "`jc_order`")
+public class JcOrder extends BaseEntity{
+	
+	public static enum Status {
+		DRAFT("待提交"),SENDED("待确认"),CONFIRMED("已确认"),RETURNED("被退回"),CLOSED("已关闭"),AUDITED("合同审核通过"),COLLECTED("已收款"),DELIVERYED("已发货"),RECEIVED("已收货"),SUPPLIER_COLLECTED("供应商已收款");
+
+		private String label;
+
+		private Status(String label) {
+			this.label = label;
+		}
+
+		public String getLabel() {
+			return label;
+		}
+
+		public String getCode() {
+			return name();
+		}
+	}
+	public static enum BuyerStatus {
+		WAIT_DRAFT("待提交"),WAIT_CONFIRM("待确认"),WAIT_PAY("待付款"),WAIT_SEND("待发货"),WAIT_RECEIVE("待收货"),WAIT_EVALUATION("待评价"),FINISHED("已完成"),CLOSED("已关闭");
+
+		private String label;
+
+		private BuyerStatus(String label) {
+			this.label = label;
+		}
+
+		public String getLabel() {
+			return label;
+		}
+
+		public String getCode() {
+			return name();
+		}
+	
+	}
+	
+	//私有属性(部分映射表字段  部分未映射)
+	/**修改人**/
+	@Column
+	private java.lang.Long updatedBy;
+	/**合同ID**/
+	@Column
+	private java.lang.Long fileId;
+	/**平台担保费**/
+	@Column
+	private BigDecimal platformFee;
+	/**支付方式**/
+	@Column
+	private PatternOfPayment patternOfPayment;
+	/**下单方式**/
+	@Column
+	private PatternOfOrder patternOfOrder;
+	/**供应商收款时间(仅在平台担保时使用)**/
+	@Column
+	private DateTime supplierCollectAt;
+	
+	private BuyerStatus buyerStatus;
+	
+	private SupplierStatus supplierStatus;
+	
+}
+
+
+
 -- -------------------------------------
 controller
 /**
