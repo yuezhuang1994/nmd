@@ -1,0 +1,119 @@
+二 使用js进行初始化以及 change事件的绑定
+
+1jsp 
+(1)模板 
+	<script type="text/html" id="optionTemplate">
+    {{if result!=null &&result.length>0}}
+      {{each result as item index}}
+        <option value="{{item.id}}">{{item.name}}</option>
+      {{/each}}
+    {{/if}}
+</script>
+(2)标签
+<div class="d-date-search form-margin-bottom">
+          <button class="btn btn-normal float-right" ng-click="search('collect');">查询结果</button>
+          <div class="d-search-date">
+              <select class="form-control" name="sel_xl" id="collectCatalog">
+
+              </select>
+          </div>
+          <div class="d-search-date">
+              <select class="form-control" name="sel_zl" id="collectSecondCatalog">
+
+              </select>
+          </div>
+          <div class="d-search-date">
+              <select class="form-control" name="sel_dl" id="collectFirstCatalog">
+
+              </select>
+          </div>
+          <div class="d-search-date">
+              <select class="form-control" name="sel_hy" id="collectIndustry">
+
+              </select>
+          </div>
+          <span class="row-info">物料类</span>
+  </div>
+  
+  2.js 
+  (1)初始化查询
+  
+  //模板赋值
+  function initSelectComponent (status,data){
+    var html = template('optionTemplate', data);
+    $('#'+status).html(html);
+  }
+  $scope.initPage = function(){
+		
+	    //物料选择下拉框初始化与事件绑定
+      (加载行业的方法)
+	    var loadIndustryFunc = function(industryResponse){
+          industryResponse.result.splice(0, 0, {id:'',name:'选择行业'});
+          for(var i=0;i<statusAry.length;i++){
+            var tabStatus = statusAry[i].code;
+            //<1.1>初始化完成
+            initSelectComponent(tabStatus+'Industry',industryResponse);
+            //<1.2>行业绑定change事件
+            $('#'+tabStatus+'Industry').on("change",{status:tabStatus}, function (industryEvent) {		//行业变更，加载大类
+              
+              $('#'+industryEvent.data.status+'FirstCatalog').empty();
+              $('#'+industryEvent.data.status+'SecondCatalog').empty();
+              $('#'+industryEvent.data.status+'Catalog').empty();
+              var industryId = $('#'+industryEvent.data.status+'Industry').val();
+              if(industryId){
+              
+                (加载大类的方法)
+                var loadFirstCatalogFunc = function(firstCatalogResponse){
+                    firstCatalogResponse.result.splice(0, 0, {id:'',name:'选择大类'});
+                    <2.1>加载大类
+                    initSelectComponent(industryEvent.data.status+'FirstCatalog',firstCatalogResponse);
+                      <2.2> 大类绑定change事件
+                    $('#'+industryEvent.data.status+'FirstCatalog').on("change",{status:industryEvent.data.status}, function (firstCatalogEvent) {	//大类变更，加载小类
+                          $('#'+firstCatalogEvent.data.status+'SecondCatalog').empty();
+                          $('#'+firstCatalogEvent.data.status+'Catalog').empty();
+                          var firstCatalogId = $('#'+firstCatalogEvent.data.status+'FirstCatalog').val();
+                          if(firstCatalogId){
+                            (加载小类的方法)
+                            var loadSecondCatalogFunc = function(secondCatalogResponse){		
+                                  secondCatalogResponse.result.splice(0, 0, {id:'',name:'选择小类'});
+                                  <3.1加载小类>
+                                  initSelectComponent(firstCatalogEvent.data.status+'SecondCatalog',secondCatalogResponse);
+                                  <3.2小类绑定change事件>
+                                  $('#'+firstCatalogEvent.data.status+'SecondCatalog').on("change",{status:firstCatalogEvent.data.status}, function (secondCatalogEvent) {	//小类变更，加载子类
+                                      $('#'+firstCatalogEvent.data.status+'Catalog').empty();
+                                      var secondCatalogId = $('#'+secondCatalogEvent.data.status+'SecondCatalog').val();
+                                      if(secondCatalogId){
+                                            (加载小类的方法)
+                                            var loadCatalogFunc = function(catalogResponse){
+                                              catalogResponse.result.splice(0, 0, {id:'',name:'选择子类'});
+                                              <4加载子类>
+                                              initSelectComponent(secondCatalogEvent.data.status+'Catalog',catalogResponse);
+                                            };
+                                            (加载小类)
+                                            get("/api/catalog/getCatalogData?pid="+$('#'+secondCatalogEvent.data.status+'SecondCatalog').val(),null,loadCatalogFunc);
+                                      }
+                                  })
+                            };
+                        (加载小类)
+                        get("/api/catalog/getCatalogData?pid="+$('#'+firstCatalogEvent.data.status+'FirstCatalog').val(),null,loadSecondCatalogFunc);
+                      }
+                    })
+                  };
+                  (加载大类)
+                  get("/api/catalog/getIndustryCatalogData?industryId="+industryId,null,loadFirstCatalogFunc);
+              }
+              })
+          }
+	    };
+	  
+      //下拉框初始化查询并赋值
+      get("/api/catalog/getIndustryData",null,loadIndustryFunc);
+	    //页面初始化查询
+      $scope.search('collect');
+	};
+	$scope.initPage();
+  
+  
+  
+  
+  
