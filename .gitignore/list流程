@@ -1,0 +1,96 @@
+一 : 所有tab页展示的字段相同
+
+1.控制器
+  (1)进入页面方法
+  (2)查询数据方法
+
+2.jsp 
+  全局 状态json数组
+
+3.js
+
+  (1) 初始化
+      循环给template 赋值
+      查询所有
+  (2) 统一的查询方法 (内外部都可以调用)
+      $scope.search = function(status){
+        var type = null;
+        $scope.orderby(status,type);
+      }
+   (3)统一的排序方法 (可以不用) 
+      $scope.orderby = function(status,type){
+        var orderStr = "";
+        $scope.loadData(status,orderStr);
+      }
+      
+    (4)统一的加载数据方法
+      $scope.loadData = function(status,orderBy){
+          var page = 1;
+          if($scope[status+'PaginationConf']
+            &&$scope[status+'PaginationConf'].currentPage){
+            page = $scope[status+'PaginationConf'].currentPage;
+          }
+
+            var postData = {
+                status : status ,
+                supplierName : $('#'+status+'SupplierName').val(),
+                systemNo : $('#'+status+'SystemNo').val(),
+                page : page,
+                orderBy :orderBy
+            }
+            transFn = function(data) {
+                 return $.param(data);
+            };
+              postCfg = {
+                 headers: {
+                     'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+                 },
+                 transformRequest: transFn
+              };
+            $http.post("/jc/buyer_order/listData", postData, postCfg).success(function(response) {
+              $scope[status+'PaginationConf'] = {
+                         currentPage: response.result.page,
+                         totalItems: response.result.total,
+                         itemsPerPage: response.result.perPage,		
+                         data : response.result.data,
+                         onChange: function() {
+                             if (response.result.page != $scope[status+'PaginationConf'].currentPage && $scope[status+'PaginationConf'].currentPage != 0) {
+                                 $scope.search(status);
+                                 $(window).scrollTop(0);
+                             }      	                    	
+                        }	
+            }
+              $('a[href="#'+status+'Tab"]').find("span").first().text($scope[status+'PaginationConf'].totalItems);
+
+              var html = template('trTemplate', response.result);
+            $('#'+status+"Container").html($compile(html)($scope));
+
+            showTip("div .cont","data-value");
+            }).error(function(data, status, headers, config) {
+              showError('查询失败，请联系管理员协助处理');
+            });
+        }
+    (4.1) 加载数据时  , 可以向后台传递选择的筛选项(例如 搜索框,下拉列表框等)
+        var postData = {
+                status : status ,
+                supplierName : $('#'+status+'SupplierName').val(),
+                systemNo : $('#'+status+'SystemNo').val(),
+                page : page,
+                orderBy :orderBy
+            }
+    (4.2) 查询结束后进行 数据的重新绑定
+        $('a[href="#'+status+'Tab"]').find("span").first().text($scope[status+'PaginationConf'].totalItems);
+         var html = template('trTemplate', response.result);
+        $('#'+status+"Container").html($compile(html)($scope));
+        showTip("div .cont","data-value");
+        
+ 二 不同 的 展示字段
+ (其实一样,只不过是初始化的时候 更简单一点,不用循环进行 tab页 id 以及 href 的赋值)
+ 省去了这一步 (写死在页面中)
+    var pageHtml = template('tabTemplate', {statusAry : statusAry});
+		$('#pageContainer').html($compile(pageHtml)($scope));
+	  $("a[data-toggle='tab']").each(function (index,element) {
+			$(element).attr('href','#'+$(element).attr('href'));
+	  });
+	    
+        
