@@ -1,0 +1,9 @@
+1.查看方法被调用   双击选中该方法，Ctrl+Alt+H 
+    
+2.查看类被调用    选中该类或者接口，右键选中References
+
+3.快速定位到某一行   ctrl + l 
+
+4.快速Outline：    Ctrl+O
+
+5.打开接口实现类     ctrl+ t 
