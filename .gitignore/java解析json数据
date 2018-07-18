@@ -1,0 +1,13 @@
+1.什么是json 
+javaScript object Notation(javaScript对象表示法
+
+2. 形式
+(1)json对象
+{'name':'yue','age':'24'}
+(2)json数组
+[{'':''},{'':'','':''}]
+
+普通java数组 ['','','','']
+
+
+3.解析
