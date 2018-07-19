@@ -9,6 +9,21 @@
 
 2.jsp 
   全局 状态json数组
+  判断状态进行按钮的显示
+ 	 <div class="table-cell w-1-5 align-right has-padding-right has-padding-top" style="padding-bottom:2px;">
+		{{if (item.status == 'EXECUTING')}}
+			<p><a class="align-right has-padding-right stop" style="cursor: pointer;" ng-click="showDialog({{item.id}},'shutdown');">停止招募</a></p>
+			<p><a class="align-right has-padding-right export" href="/front/buyer/recruit/{{item.id}}/getExcel">数据报表</a></p>
+			<p><a class="align-right has-padding-right selmsg" href="/front/recruit/{{item.id}}/showDetail?tabNumber=2" target="_blank">查看留言({{if item.commentNum!=0 && item.newComment}}<span class="newmsg">{{item.commentNum}}</span>{{else}}{{item.commentNum}}{{/if}})</a></p>
+		{{else if (item.status == 'FINISHED' || item.status == 'SHUTDOWN')}}
+			<p><a class="align-right has-padding-right export" href="/front/buyer/recruit/{{item.id}}/getExcel">数据报表</a></p>
+			<p><a class="align-right has-padding-right selmsg" href="/front/recruit/{{item.id}}/showDetail?tabNumber=2" target="_blank">查看留言({{if item.commentNum!=0 && item.newComment}}<span class="newmsg">{{item.commentNum}}</span>{{else}}{{item.commentNum}}{{/if}})</a></p>
+		{{else}}
+			<p><a class="align-right has-padding-right updrecruit" href="/front/buyer/recruit/{{item.id}}/update">编辑</a></p>
+			<p><a class="align-right has-padding-right a-fb" style="cursor: pointer;" ng-click="showDialog({{item.id}},'publish');">发布</a></p>
+			<p><a class="align-right has-padding-right delrecruit" style="cursor: pointer;" ng-click="showDialog({{item.id}},'delete');">删除</a></p>
+		{{/if}}
+	</div>
 
 3.js
 
