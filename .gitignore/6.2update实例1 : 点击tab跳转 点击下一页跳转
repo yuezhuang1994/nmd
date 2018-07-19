@@ -1,0 +1,298 @@
+
+1.点击图片进行上下页的跳转
+
+  <div class="tab-pane active" id="baseinfor">
+              //直接点击图片进行tab页的切换
+              <div class="steps">
+                  <a href="#" ng-click="validateTab(0);" class="stepactive">
+                      <img src="/bootstrapFrame/img/step/beginactive.png" />
+                      <p>基本信息</p>
+                  </a>
+                  <a href="#" ng-click="validateTab(1);" class="tabs step middle">
+                      <img src="/bootstrapFrame/img/step/middle.png" />
+                      <p>商务条款</p>
+                  </a>
+                  <a href="#" ng-click="validateTab(2);" class="tabs step middle">
+                      <img src="/bootstrapFrame/img/step/middle.png" />
+                      <p>物料清单</p>
+                  </a>
+                  <a href="#" ng-click="validateTab(3);" class="tabs stepend middle">
+                      <img src="/bootstrapFrame/img/step/end.png" />
+                      <p>询盘范围</p>
+                  </a>
+              </div>
+              
+              
+              <p class="p-sifting"><span class="color-orange" style="font-size: 16px;">▲</span>&nbsp;详细描述询盘项目，会吸引更多供应商参与</p>
+              <form id="baseinforform" method="post" class="baseform">
+                  <div class="row formbg">
+                      <div class="form-group">
+                          <span class="color-red"> * </span>
+                          <label>询盘名称</label>
+                          <div class="input-group float-left input-group-big">
+                              <input type="hidden" id="jbxx_id" name="jbxx_id" ng-model="project.id" />
+        <input type="text" id="jbxx_name" name="jbxx_name" ng-model="project.name" class="form-control input-md" placeholder="请输入询盘名称" />
+                          </div>
+                      </div>
+                  </div>
+                  <div class="row formbgrow">
+                      <div class="formbg-w-half float-left">
+                          <div class="form-group able">
+                              <span class="color-red">* </span>
+                              <label>项目阶段</label>
+                              <div class="input-group float-left input-group-lg">
+                                  <nmd-stage conf="projectStage"></nmd-stage>
+                              </div>
+                          </div>
+                          <div class="form-group disabl">
+                              <span class="color-red">* </span>
+                              <label>项目阶段</label>
+                              <div class="input-group float-left input-group-lg">
+                                  <input type="text" id="stageName" class="form-control input-md" disabled="disabled" value="" />
+                              </div>
+                          </div>
+                      </div>
+                      <div class="formbg-w-half float-left" style="margin-left: 2%;">
+                          <div class="form-group able">
+                              <span class="color-red">* </span>
+                              <label>询盘物料类型</label>
+                              <div class="input-group float-left d-sel-half">
+                                  <select id="jbxx_industryId" name="jbxx_industryId"
+            ng-model="project.industryId" ng-change="getFirstCatalogData();" 
+             class="form-control select2 float-left sel-half">
+            <option value="">请选择</option>
+            <option ng-repeat="industry in industryData"
+              value="{{industry.id}}">{{industry.name}}</option>
+          </select>
+          <select id="jbxx_catalogId" name="jbxx_catalogId"
+            ng-model="project.catalogId" 
+            class="form-control select2 float-left sel-half" name="sel_wlxl" style="margin-left: 2%;">
+            <option value="">请选择</option>
+            <option ng-repeat="firstCatalog in firstCatalogData"
+              value="{{firstCatalog.id}}">{{firstCatalog.name}}</option>
+          </select>
+                              </div>
+                          </div>
+                          <div class="form-group disabl">
+                              <span class="color-red">* </span>
+                              <label>询盘物料类型</label>
+                              <div class="input-group float-left input-group-lg">
+                                  <input type="text" ng-model="project.catalogName" class="form-control input-md" disabled="disabled" value="" />
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+                  <div class="row formbg">
+                      <div class="form-group">
+                          <label>项目简介</label>
+                          <div class="input-group float-left input-group-big">
+                            <textarea id="jbxx_summary" name="jbxx_summary"
+          ng-model="project.summary" class="form-control input-md txt-xpbz" placeholder="请简要描述该询盘项目的背景、现状、规划等信息，建议明确后期供应商的引进计划及邀约洽谈时间。"></textarea>
+                          </div>
+                      </div>
+                  </div>
+                  <div class="row formbgrow">
+                      <div class="formbg-w-half float-left">
+                          <div class="form-group">
+                              <span class="color-red">* </span>
+                              <label>联系人</label>
+                              <div class="input-group float-left input-group-lg">
+                                  <input type="text" id="jbxx_linkman"
+                  name="jbxx_linkman" ng-model="project.linkman"
+                  class="form-control input-md" placeholder="请输入询盘联系人姓名"/>
+                              </div>
+                          </div>
+                      </div>
+                      <div class="formbg-w-half float-left" style="margin-left: 2%;">
+                          <div class="form-group">
+                              <span class="color-red">* </span>
+                              <label>联系电话</label>
+                              <div class="input-group float-left input-group-lg">
+                                  <input type="text" id="jbxx_contactPhone"
+                  name="jbxx_contactPhone" ng-model="project.contactPhone"
+                  class="form-control input-md" placeholder="请输入联系电话"/>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+                  <div class="row formbg">
+                      <div class="form-group">
+                          <label>邮箱</label>
+                          <div class="input-group float-left input-group-lg">
+                              <input type="text" id="jbxx_email" name="jbxx_email"
+                  ng-model="project.email" class="form-control input-md" placeholder="请输入电子邮箱" />
+                          </div>
+                      </div>
+                  </div>
+                  
+                  //上一步和下一步按钮
+                  <div class="row">
+                      <button class="btn btn-normal inline nextstep" type="button" ng-click="next();">下一步</button>
+                      <button class="btn btn-normal inline" type="button" ng-click="save();">暂存</button>
+                      <button class="btn btn-normal inline" type="button" ng-click="publish();">发布</button>
+                  </div>
+              </form>
+</div>
+
+思路: 
+(1)点击tab页 进行跳转
+/***
+	 * 校验并跳转到TAB
+	 * ***/
+	$scope.validateTab = function(targetIndex){
+        // 修改可以跳转
+        if(project.id){
+          var index = $("#navContent div[class='tab-pane active']").index();
+          if(index==0){
+            if(!$("#baseinforform").valid()){
+              showTab(0);
+              return;
+            }
+          }
+          showTab(targetIndex);
+        }else{
+          
+          //添加只能一步一步
+          $scope.next();
+        }
+        sub();
+	}
+
+
+(2)上一页
+
+/***
+	 * 下一页
+	 * ***/
+	$scope.next = function(){
+		var index = $("#navContent div[class='tab-pane active']").index();
+		//校验是否符合规则
+    if(index==0){
+			if(!$("#baseinforform").valid()){
+				showTab(0);
+				return;
+			}
+		}else if(index==1){
+			if(!$("#baseinforform").valid()){
+				showTab(0);
+				return;
+			}
+			if(!$("#clauseform").valid()){
+				return;
+			}
+		}else if(index==2){
+			if(!$("#baseinforform").valid()){
+				showTab(0);
+				return;
+			}
+			if(!$("#clauseform").valid()){
+				showTab(1);
+				return;
+			}
+			if($scope.materialListPaginationConf.totalItems == 0){
+				toastInfo("请至少添加一项物料");	
+				return;
+			}
+		}
+    
+    //新建
+		if(!project.id){
+              var callFunction = function (nextData){
+                if(nextData.status=="000000"){
+                      $scope.project.id=nextData.result.id;
+                      $scope.project.catalogId=nextData.result.catalogId;
+
+                      project.id = nextData.result.id;
+                      project.catalogId=nextData.result.catalogId;
+                      project.stage = $scope.project.stage;
+                      $('#stageName').val(getStageString($scope.project.stage));
+
+                      //首次更新主营业务名称
+                      if(!project.catalogName
+                          &&$rootScope.firstCatalogData){
+                        //更新行业大类名称
+                          for(var i=0;i<$rootScope.firstCatalogData.length;i++){
+                            var obj = $rootScope.firstCatalogData[i];
+                            if(obj.id==project.catalogId){
+
+                              project.catalogName=obj.name;
+                              project.catalogId = $scope.project.catalogId;
+
+                              $scope.project.catalogName=project.catalogName;
+
+                              $(".able").hide();
+                                    $(".disabl").show();
+                              break;
+                            }
+                          }
+
+                          /**查询子类**/
+                          $http.get(path + "/api/catalog/getCatalogData?pid="+project.catalogId).success(function(response) {
+                            $rootScope.materialSecondCatalogs = response.result;
+                            $rootScope.supplierSecondCatalogs = response.result;
+                            $rootScope.supplierSecondCatalogsFocus = response.result;
+                          });
+
+                      }
+                      var index = $("#navContent div[class='tab-pane active']").index();
+                      showTab(index+1);
+
+                      if(!$scope.materialListPaginationConf.data){
+                    $scope.searchProjectMaterials();
+                      }
+                      if($rootScope.materialSelectPaginationConf.data==null){
+                        $rootScope.searchMaterials();
+                      }
+                      if($rootScope.bomSelectPaginationConf.data==null){
+                        $rootScope.searchBoms();
+                      }
+                      if($rootScope.supplierListPaginationConf.data==null){
+                        $rootScope.seachSuppliers();
+                      }
+                      if($rootScope.focusSupplierListPaginationConf.data==null){
+                        $rootScope.seachFocusSuppliers();
+                      }
+
+
+                    }else{
+                      showError('保存询盘失败，请联系管理员协助处理');
+                    }
+              }
+              var url = path + '/front/buyer/projects/saveProject';
+              $scope.saveToDB(url,callFunction);
+              
+		}else{
+              showTab(index+1);
+
+              if(!$scope.materialListPaginationConf.data){
+                $scope.searchProjectMaterials();
+                  }
+                  if($rootScope.materialSelectPaginationConf.data==null){
+                    $rootScope.searchMaterials();
+                  }
+                  if($rootScope.bomSelectPaginationConf.data==null){
+                    $rootScope.searchBoms();
+                  }
+                  if($rootScope.supplierListPaginationConf.data==null){
+                    $rootScope.seachSuppliers();
+                  }
+                  if($rootScope.focusSupplierListPaginationConf.data==null){
+                    $rootScope.seachFocusSuppliers();
+                  }
+		}
+		$("body").removeClass("modal-open");
+	}
+  
+  
+  (3)
+  上一页不用进行验证
+  
+  /***
+	 * 上一页
+	 * ***/
+	$scope.pre = function(){
+		var index = $("#navContent div[class='tab-pane active']").index();
+		showTab(index-1);
+		$("body").removeClass("modal-open");
+	}
+
