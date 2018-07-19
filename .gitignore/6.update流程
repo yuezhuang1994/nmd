@@ -73,6 +73,20 @@
           $("input[name='" + name + "'][value='"+val+"']").prop("checked", true);
           $("input[name='" + name + "'][value='"+val+"']").prev().addClass("icon-radiochecked").removeClass("icon-radio-check");
       }
+      
+      复选框
+      function setCheckboxChecked(name,arry){
+	    $("input[name='" + name + "']").each(function (index,element) {
+		 if($.inArray($(this).val(), arry)>-1){
+			 $(this).prev().addClass("iconchecked").removeClass("icon-check");
+		 $(this).prop("checked", true);
+		 }else{
+			 $(this).prev().addClass("icon-check").removeClass("iconchecked");
+		 $(this).prop("checked", false);
+		 }
+	    });
+     }
+      
   (3)初始化模板 
       var response = {
           result : techniqueAchievement.applicationAreaList
