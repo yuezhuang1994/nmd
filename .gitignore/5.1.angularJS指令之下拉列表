@@ -1,4 +1,5 @@
 一 使用指令 可以代码通用
+重点 : 没有初始化的选中值
 
 angular.module('nmd.catalogSelect', []).directive('nmdCatalogSelect',["$http",function($http) {
 		return {
