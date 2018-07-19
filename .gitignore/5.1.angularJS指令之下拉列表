@@ -1,6 +1,8 @@
 一 使用指令 可以代码通用
 重点 : 没有初始化的选中值
+完全可以重用 , 只需要更改样式
 
+1.
 angular.module('nmd.catalogSelect', []).directive('nmdCatalogSelect',["$http",function($http) {
 		return {
 			restrict : 'EA',
@@ -160,6 +162,17 @@ angular.module('nmd.catalogSelect', []).directive('nmdCatalogSelect',["$http",fu
 		};
 } ]);
 
+2.
 页面中使用
 <nmd-catalog-select conf="catalogSelect"></nmd-catalog-select>
+
+3.
+取值: 
+industryId : $('select[name=industryId]').val(),
+firstCatalogId : $('select[name=firstCatalogId]').val(),
+secondCatalogId : $('select[name=secondCatalogId]').val(),
+catalogId : $('select[name=catalogId]').val(),
+
+
+
 
