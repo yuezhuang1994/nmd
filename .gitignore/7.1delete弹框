@@ -1,0 +1,124 @@
+(1)
+/**弹窗**/
+	$scope.showDialog = function(id,type){
+            if(type == 'showSign'){
+              $('#signDialog').attr("data-id",id);
+              $scope.sendAngPost(id,"schema");
+
+              var bmHtml = template('bmTemplate',{'bmAry':bmAry} );
+              $('#bmContainer').html($compile(bmHtml)($scope));
+
+              $("#bmContainer").find("a[class='tabs-sub']").each(function (index,element) {
+                 $(this).attr("href",'#'+$(this).attr("href"));
+                 $(this).click(function () {
+                        $(this).tab("show");
+                        sub();
+                  });
+               });
+              $scope.searchSignData();
+        //			$('#signDialog').modal("show");
+              ModalShow("signDialog");
+            }else if(type == 'showInvitation'){
+              $('#invitationDialog').attr("data-id",id);
+              $scope.dialogData('invitation');
+        //			$('#invitationDialog').modal("show");
+              ModalShow("invitationDialog");
+            }else if(type == 'shutdown'){
+              setRadioByName("shutDownReason");
+              setRadioChecked('shutDownReason','该次招募的目标已达成');
+              $('#shutdownDialog').attr("data-id",id);
+              $('#shutdownDialog').modal("show");
+            }else if(type == 'publish'){
+              shortShowConfirm(null,'点击"确定"发布该招募，招募发布后将不能修改。',function(){$scope.execute(id,type);},null);
+            }else if(type == 'delete'){
+              shortShowConfirm(null,'确认要删除吗？',function(){$scope.execute(id,type);},null);
+            }else if(type == 'cancle'){
+              $("#allnoinvite").attr("data-id",id);
+              $scope.clickCancleInvite();
+            }
+	
+	}
+  
+  
+  (2)通用的方法
+  
+  /**执行命令**/
+	$scope.execute = function(id,type){
+          var url = "";
+          var data = null;
+          var callFunc = null;
+          if(type=="shutdown"){
+                url = "/front/buyer/recruit/saveShutdownReason";
+                var reason = $('input[name=shutDownReason]:checked').val();
+                var other = $('#reasonOther').val();
+                if(other){
+                  reason = (reason + "（"+other+"）");
+                }
+                data = {
+                   recruitId : $('#shutdownDialog').attr("data-id"),
+                   shutDownReason : reason
+                };
+                callFunc = function(){
+                  toastInfo("操作成功");
+                  $('#'+type+'Dialog').modal("hide");
+                  $scope.allSearch();
+                };
+          }else if(type == "publish"){
+                url = "/front/buyer/recruit/" + id + "/publishVendorRecruit";
+                callFunc = function(){
+                  toastInfo("操作成功");
+                  $scope.allSearch();
+                };
+          }else if(type == "delete"){
+                url = "/front/buyer/recruit/delVendorRecruit?recruitId=" + id;
+                callFunc = function(){
+                  toastInfo("操作成功");
+                  $scope.allSearch();
+                };
+          }else if(type == 'attention'){
+                url = "/front/buyer/recruit/addCompanyVendor?vendorId=" + id;
+                callFunc = function(){
+                  if($('#signDialog').is(":visible")){
+                    $scope.searchSignData();
+                  }else{
+                    $scope.dialogData("invitation");	
+                  }
+                  $scope.allSearch();
+                  toastInfo("请到供应商总览-已关注供应商查看您关注的企业信息。");
+                };
+          }else if(type == 'invitation'){
+                url = "/front/buyer/recruit/invitationCompanyVendor?signId="+id;
+
+                callFunc = function(){
+                  $scope.searchSignData();
+                  $scope.allSearch();
+                  toastInfo("系统自动将向您邀约的企业推送邀约信息。"); 
+                };
+          }
+          
+          //执行方法
+          $.ajax({
+            url:url,
+            data:data,
+              type:'post', 
+              dataType:'json',
+              beforeSend:function(xhr){
+
+              },
+            success: function (response) {
+              if(response.status=='000000'){
+                if(callFunc){
+                  callFunc();
+                }	
+              }else{
+                showError(response.message);
+              }
+            },error: function (xhr,status,error){
+              showError("操作失败，请联系系统管理员协助处理。");
+              },complete : function(xhr,status){
+
+              }
+          });
+	}
+  
+  
