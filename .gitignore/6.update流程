@@ -1,0 +1,286 @@
+---controller
+进行数据复制
+/**
+	 * 修改
+	 */
+	@RequestMapping(value = "/{id:^\\d+$}/update", method = RequestMethod.GET)
+	public String update(@PathVariable("id") Long id,HttpServletRequest request,Model model) {
+		UserModel userModel = getCurrentUserModel();
+		TechniqueAchievement techniqueAchievement = new TechniqueAchievement();
+		if(id!=null){
+			techniqueAchievement = techniqueAchievementService.find(id);
+			if(techniqueAchievement!=null
+					&&(getCurrentUserModel().getCompanyId().longValue()==techniqueAchievement.getCompanyId().longValue())
+					&&(TechniqueAchievement.Status.DRAFT.getCode().equals(techniqueAchievement.getStatus().getCode())||TechniqueAchievement.Status.NOPEND.getCode().equals(techniqueAchievement.getStatus().getCode())) ){
+				TechniqueAchievementModel techniqueAchievementModel = techniqueAchievementService.load(id);
+				model.addAttribute("techniqueAchievement", JsonUtil.dump(techniqueAchievementModel));
+				
+				//用户证书信息
+				UserProfile userProfile = userProfileService.findUserProfile(userModel.getId());
+				model.addAttribute("userProfile", userProfile);
+				//公司信息
+				model.addAttribute("name", userProfile.getCompanyName());
+				model.addAttribute("identity", userModel.getRelationCompany() != null ? userModel.getRelationCompany().getIdentity() : "");
+				model.addAttribute("position", userProfile.getPosition());
+				if(userProfile.getIdentityFileId() != null) {
+					File file = fileService.find(userProfile.getIdentityFileId());
+					model.addAttribute("url", file.getRealUrl());
+					model.addAttribute("imageId", file.getId());
+				}
+				//个人主营产品
+				List<Long> catalogIds = userCatalogService.queryCataLogIds(userModel.getId());
+				List<CompanyBusinessModel> companyBusinessModels = userCatalogService.getUserCatalogLayers(catalogIds);
+				model.addAttribute("companyBusinessModels", companyBusinessModels);
+				//个人自定义主营产品
+				List<UserCustomCatalog> userCustomCatalogs = userCustomCatalogService.list(userModel.getId());
+				model.addAttribute("userCustomCatalogs", userCustomCatalogs);
+				
+				UserIdentitySignLog userIdentitySignLog = userIdentitySignLogService.findByUserId(userModel.getId());
+				if(userIdentitySignLog != null) {
+					model.addAttribute("status", userIdentitySignLog.getStatus());
+					if(userIdentitySignLog.getStatus() == UserIdentitySignLog.Status.NOPEND)
+						model.addAttribute("reason", userIdentitySignLog.getRejectReason());
+				}
+				model.addAttribute("enterType", "SIXIN");
+				return "technique/achievement/update";
+			}
+		}
+		return "redirect:/technique/no_permission";
+	}
+  -- ---------------jsp 
+  全局变量申明
+  <script type="text/javascript">
+	  var techniqueAchievement = ${techniqueAchievement};
+	</script>
+  
+  
+  -- -------------------js
+  一 : 初始化 赋值
+  (1)初始化简单表单数据
+    var propAry = ['name','briefIntroduction','companyName','linkman','contactNumber','email'];
+    for(var i=0;i<propAry.length;i++){
+      $('#'+propAry[i]).val(techniqueAchievement[propAry[i]]);
+    }
+   (2) 初始化单选按钮
+      通用的方法
+      function setRadioChecked(name,val){
+          //取消所有选中的按钮
+          $("input[name='" + name + "']").each(function (index,element) {
+               $(this).prev().addClass("icon-radio-check").removeClass("icon-radiochecked");
+               $(this).prop("checked", false);
+          });
+          //选中初始化值
+          $("input[name='" + name + "'][value='"+val+"']").prop("checked", true);
+          $("input[name='" + name + "'][value='"+val+"']").prev().addClass("icon-radiochecked").removeClass("icon-radio-check");
+      }
+  (3)初始化模板 
+      var response = {
+          result : techniqueAchievement.applicationAreaList
+      };
+      var html = template('applicationAreaTemplate', response);
+      $("#applicationAreaContainer").html(html);
+   (4)初始化图片
+     通用方法
+     /**图片展示**/
+      function previewImage(file){
+        var html = template('imageTemplate', file);
+        $("#imageContainer").html(html);
+      }
+      
+     var len = techniqueAchievement.imageList.length;
+      for(var i=0;i<len;i++){
+        previewImage(techniqueAchievement.imageList[i]);
+      }
+    
+    二: 初始化页面(组件赋值)
+$scope.initPage = function(){
+		var componentAry = [{id:'applicationArea',name:'应用领域'},{id:'catalog',name:'所属类别'},{id:'product',name:'所属产品'}];
+		for(var i=0;i<componentAry.length;i++){
+		    $.ajax({  
+		        type: 'POST',  
+		        url: '/technique/common/'+componentAry[i].id,
+		        dataType: "JSON",  
+		        async: false,  
+		        cache: true,  
+		        success: function(response){  
+		        	if(response.status='000000'){
+						var html = template(componentAry[i].id+'SelectTemplate', response);
+						$("#"+componentAry[i].id+"SelectContainer").html(html);
+						switchClass("span[data-type="+componentAry[i].id+"]","yy-type-active",(true));
+					}else{
+						showError('查询'+componentAry[i].name+'失败，请联系管理员协助处理');
+					}
+		        },  
+		        error: function(response){  
+		        	showError('查询'+componentAry[i].name+'失败，请联系管理员协助处理');
+		        }  
+		    });  
+		}
+	}	
+	$scope.initPage();
+
+
+    
+    三: update方法
+/***暂存**/
+    $scope.save = function(){
+    	if(validate()){
+    		shortShowConfirm('友情提示','确认暂存?',function(){
+	    		var callback = function (returnData){
+	    			if(returnData.status=='000000'){
+	    				$window.location.href = '/technique/achievement/list?tabIndex=1';
+					}else{
+						showError(returnData.message);
+					}
+	    		};
+	    		$scope.saveData("/technique/achievement/save","DRAFT",callback);
+    		},['确定','取消']);
+    	}
+	}    
+/***发送**/
+    $scope.send = function(){
+    	if(validate()){
+    		shortShowConfirm('友情提示',tipAry['apply'],function(){
+    			$scope.invalidIndentity("/company/identity/valid",null,'0');
+    		},['确定','取消']);
+    	}
+	}
+  
+/***通用保存DB**/
+    $scope.saveData = function(requestUrl,status,callback){
+    	var postData = {
+    		id : techniqueAchievement.id,
+    		name : $('#name').val(),
+    		stage : $('input[name="stage"]:checked').val() ,
+    		briefIntroduction : $('#briefIntroduction').val(),
+    		isPublic : $('input[name="isPublic"]:checked').val(),
+    		status : status
+    	}
+    	transFn = function(data) {
+            return $.param(data);
+        };
+        postCfg = {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+            },
+            transformRequest: transFn
+        };
+        $http.post(requestUrl, postData, postCfg).success(function(response) {
+        	if(callback){
+        		callback(response);
+        	}
+        }).error(function(data, status, headers, config) {
+            showError('保存失败，请联系管理员协助处理');
+        });
+    }
+
+
+ 不同update加入不同的校验规则和方法
+ (1)校验规则
+ 
+ /**表单验证**/
+$("#mainForm").validate({
+    rules: {
+    	name: {
+            required: true,
+            isAllSpace: true,
+            maxlength:55
+        },
+        companyName: {
+            isAllSpace: true,
+            maxlength:45
+        },
+        contactNumber: {
+            isAllSpace: true,
+            maxlength:30
+        },
+        linkman: {
+            isAllSpace: true,
+            maxlength:30
+        },
+        email: {
+        	required: true,
+            email: true,
+            maxlength:50
+        }
+    },
+    submitHandler: function () {}
+});
+
+(2) 保存之前的校验
+
+/***
+ * 保存之前的校验
+ * **/
+function validate(){
+      if(!$("#mainForm").valid()){
+        $("html,body").animate({ scrollTop: 0 }, 500);
+        return false;
+      }
+      var typeAry = [{code : 'applicationArea',name : '应用领域'},{code : 'catalog',name : '所属类别'},{code : 'product',name : '应用产品'}];
+      for(var i=0;i<typeAry.length; i++){
+        var array = getObjectAry(typeAry[i].code);
+        if(array.length==0){
+          $(window).scrollTop(0);
+          toastInfo(typeAry[i].name+"不能为空");
+          return false;
+        }
+      }
+      if((/^\s+$/g.test($('#briefIntroduction').val()))){
+        toastInfo("特点简介不能全是空格");
+        return false;
+      }
+      if($('#briefIntroduction').val().length>300){
+        toastInfo("特点简介不能超过300个字符");
+        return false;
+      }
+
+      if($('img[data-type="image"]').length==0){
+        toastInfo("请上传产品图片");
+        return false;
+      }
+      if(editor.getSource().length>10000){
+        toastInfo("性能描述超长");
+        return false;
+      }
+      return true;
+}
+
+
+(3)文本域进行字数的实时显示
+//限制字数    
+$('#briefIntroduction').on('keyup', function () {
+      var len = $(this).val().length;
+      if(len > 300){
+        $(".font-cont").html(0);
+      } else if (len == 0) {
+            $(".font-cont").html(300);
+      } else {
+          $(".font-cont").html(300 - len);
+      }
+});
+ 
+
+********************公共的js方法
+ 
+ function showTip(jqExp,attrName){
+    $(jqExp).each(function (index,element) {
+		$(this).unbind('mouseenter').unbind('mouseleave');
+		$(this).hover(function (e) {
+	        var pos = MousePosition(e);
+	        var dataval = $(this).attr(attrName);
+	        if(dataval){
+	        	var html = "<div style=\"position:absolute;" + (pos.left ? "left" : "right") + ":" + pos.x + "px;" + (pos.top ? "top" : "bottom") + ":" + pos.y + "px;z-index:2000;\" class=\"hovertip\">" + dataval + "</div>";
+		        $("body").append(html);
+	        }
+	    }, function () {
+	        $(".hovertip").remove();
+	    })
+    });
+    sub();
+}
+ 
+ 
+ 
+   
+  
