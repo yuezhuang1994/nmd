@@ -1,0 +1,255 @@
+--------------------
+controller
+//可以进行初始化数据(也可以不生成)
+
+@LoginBack(backUrl="/technique")
+	@RequestMapping(value = "/create", method = RequestMethod.GET)
+	public String create(HttpServletRequest request,Model model) {
+		UserModel userModel = getCurrentUserModel();
+		
+    
+		TechniqueAchievement techniqueAchievement = new TechniqueAchievement();
+		techniqueAchievement.setCompanyName(userModel.getCompany().getName());
+		techniqueAchievement.setLinkman(userModel.getUserProfile().getName());
+		techniqueAchievement.setContactNumber(userModel.getPhone());
+		techniqueAchievement.setEmail(userModel.getUserProfile().getEmail());
+		
+		model.addAttribute("techniqueAchievement", JsonUtil.dump(techniqueAchievement));
+		//用户证书信息
+		UserProfile userProfile = userProfileService.findUserProfile(userModel.getId());
+		model.addAttribute("userProfile", userProfile);
+		//公司信息
+		model.addAttribute("name", userProfile.getCompanyName());
+		model.addAttribute("identity", userModel.getRelationCompany() != null ? userModel.getRelationCompany().getIdentity() : "");
+		model.addAttribute("position", userProfile.getPosition());
+		if(userProfile.getIdentityFileId() != null) {
+			File file = fileService.find(userProfile.getIdentityFileId());
+			model.addAttribute("url", file.getRealUrl());
+			model.addAttribute("imageId", file.getId());
+		}
+		//个人主营产品
+		List<Long> catalogIds = userCatalogService.queryCataLogIds(userModel.getId());
+		List<CompanyBusinessModel> companyBusinessModels = userCatalogService.getUserCatalogLayers(catalogIds);
+		model.addAttribute("companyBusinessModels", companyBusinessModels);
+		//个人自定义主营产品
+		List<UserCustomCatalog> userCustomCatalogs = userCustomCatalogService.list(userModel.getId());
+		model.addAttribute("userCustomCatalogs", userCustomCatalogs);
+		
+		UserIdentitySignLog userIdentitySignLog = userIdentitySignLogService.findByUserId(userModel.getId());
+		if(userIdentitySignLog != null) {
+			model.addAttribute("status", userIdentitySignLog.getStatus());
+			if(userIdentitySignLog.getStatus() == UserIdentitySignLog.Status.NOPEND)
+				model.addAttribute("reason", userIdentitySignLog.getRejectReason());
+		}
+		model.addAttribute("enterType", "SIXIN");
+
+		return "technique/achievement/update";
+	}
+  -- ----------------
+  jsp
+  全局变量申明
+  <script type="text/javascript">
+	  var techniqueAchievement = ${techniqueAchievement};
+	</script>
+  
+-- -----------------
+js 
+
+(1)初始化赋值
+/**初始化**/
+	var propAry = ['name','briefIntroduction','companyName','linkman','contactNumber','email'];
+	for(var i=0;i<propAry.length;i++){
+		$('#'+propAry[i]).val(techniqueAchievement[propAry[i]]);
+	}
+  
+(2)默认选中赋值
+setRadioChecked('stage',defaultValue.stage);
+setRadioChecked('isPublic',defaultValue.isPublic);
+
+(3)初始化页面
+$scope.initPage = function(){
+		var componentAry = [{id:'applicationArea',name:'应用领域'},{id:'catalog',name:'所属类别'},{id:'product',name:'所属产品'}];
+		for(var i=0;i<componentAry.length;i++){
+		    $.ajax({  
+		        type: 'POST',  
+		        url: '/technique/common/'+componentAry[i].id,
+		        dataType: "JSON",  
+		        async: false,  
+		        cache: true,  
+		        success: function(response){  
+		        	if(response.status='000000'){
+						var html = template(componentAry[i].id+'SelectTemplate', response);
+						$("#"+componentAry[i].id+"SelectContainer").html(html);
+						switchClass("span[data-type="+componentAry[i].id+"]","yy-type-active",(true));
+					}else{
+						showError('查询'+componentAry[i].name+'失败，请联系管理员协助处理');
+					}
+		        },  
+		        error: function(response){  
+		        	showError('查询'+componentAry[i].name+'失败，请联系管理员协助处理');
+		        }  
+		    });  
+		}
+	}
+	$scope.initPage();
+
+二 校验规则
+
+(1)
+/**表单验证**/
+$("#mainForm").validate({
+    rules: {
+    	name: {
+            required: true,
+            isAllSpace: true,
+            maxlength:55
+        },
+        companyName: {
+            isAllSpace: true,
+            maxlength:45
+        },
+        contactNumber: {
+            isAllSpace: true,
+            maxlength:30
+        },
+        linkman: {
+            isAllSpace: true,
+            maxlength:30
+        },
+        email: {
+        	required: true,
+            email: true,
+            maxlength:50
+        }
+    },
+    submitHandler: function () {}
+});
+
+(2)保存之前校验
+
+/***
+ * 保存之前的校验
+ * **/
+function validate(){
+	if(!$("#mainForm").valid()){
+		$("html,body").animate({ scrollTop: 0 }, 500);
+		return false;
+	}
+	var typeAry = [{code : 'applicationArea',name : '应用领域'},{code : 'catalog',name : '所属类别'},{code : 'product',name : '应用产品'}];
+	for(var i=0;i<typeAry.length; i++){
+		var array = getObjectAry(typeAry[i].code);
+		if(array.length==0){
+			$(window).scrollTop(0);
+			toastInfo(typeAry[i].name+"不能为空");
+			return false;
+		}
+	}
+	if((/^\s+$/g.test($('#briefIntroduction').val()))){
+		toastInfo("特点简介不能全是空格");
+		return false;
+	}
+	if($('#briefIntroduction').val().length>300){
+		toastInfo("特点简介不能超过300个字符");
+		return false;
+	}
+	
+	if($('img[data-type="image"]').length==0){
+		toastInfo("请上传产品图片");
+		return false;
+	}
+	if(editor.getSource().length>10000){
+		toastInfo("性能描述超长");
+		return false;
+	}
+	return true;
+}
+
+(3) 其他一些展示的操作
+
+$(function () {
+
+});
+
+
+三 angularJS操作
+(1)通用的保存
+/***通用保存DB**/
+    $scope.saveData = function(requestUrl,status,callback){
+    	
+    	var applicationAreaObjectAry = getObjectAry("applicationArea");
+    	var catalogObjectAry = getObjectAry("catalog");
+    	var productObjectAry = getObjectAry("product");
+    	var fileObjectAry = getObjectAry("file");
+    	
+    	var postData = {
+    		id : techniqueAchievement.id,
+    		name : $('#name').val(),
+    		stage : $('input[name="stage"]:checked').val() ,
+    		applicationAreaIdString : getPropString(applicationAreaObjectAry,"id"),
+    		applicationArea : getPropString(applicationAreaObjectAry,"name"),
+    		catalogIdString : getPropString(catalogObjectAry,"id"),
+    		catalog : getPropString(catalogObjectAry,"name"),
+    		productIdString : getPropString(productObjectAry,"id"),
+    		product : getPropString(productObjectAry,"name"),
+    		imageIdString : $('img[data-type="image"]').attr("data-id"),
+    		briefIntroduction : $('#briefIntroduction').val(),
+    		companyName : $('#companyName').val(),
+    		contactNumber : $('#contactNumber').val(),
+    		linkman : $('#linkman').val(),
+    		email : $('#email').val(),
+//    		telphonePubliched : $('input[name="telphonePubliched"]:checked').val() ,
+    		performanceDescription : editor.getSource(),
+    		fileIdString : getPropString(fileObjectAry,"id"),
+    		isPublic : $('input[name="isPublic"]:checked').val(),
+    		status : status
+    	}
+    	transFn = function(data) {
+            return $.param(data);
+        };
+        postCfg = {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+            },
+            transformRequest: transFn
+        };
+        $http.post(requestUrl, postData, postCfg).success(function(response) {
+        	if(callback){
+        		callback(response);
+        	}
+        }).error(function(data, status, headers, config) {
+            showError('保存失败，请联系管理员协助处理');
+        });
+    }
+
+(2)暂存和提交按钮
+/***暂存**/
+    $scope.save = function(){
+    	if(validate()){
+    		shortShowConfirm('友情提示','确认暂存?',function(){
+	    		var callback = function (returnData){
+	    			if(returnData.status=='000000'){
+	    				$window.location.href = '/technique/achievement/list?tabIndex=1';
+					}else{
+						showError(returnData.message);
+					}
+	    		};
+	    		$scope.saveData("/technique/achievement/save","DRAFT",callback);
+    		},['确定','取消']);
+    	}
+	}
+    
+	/***发送**/
+    $scope.send = function(){
+    	if(validate()){
+    		shortShowConfirm('友情提示',tipAry['apply'],function(){
+    			$scope.invalidIndentity("/company/identity/valid",null,'0');
+    		},['确定','取消']);
+    	}
+	}
+
+
+
+
+
+
+  
