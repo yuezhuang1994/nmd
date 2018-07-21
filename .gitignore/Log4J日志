@@ -1,0 +1,40 @@
+一 配置 
+log4j.properties
+
+
+log4j.rootLogger=WARN, stdout, R
+log4j.logger.org.springframework.jdbc.core.JdbcTemplate=debug
+
+
+
+二 : 用法
+使用指定类初始化日志对象
+
+在日志输出的时候，可以打印出日志信息所在类
+例 : 
+private static Logger log = LoggerFactory.getLogger(TestTechniqueAop.class);
+
+ @Around("execution(* com.hms.admin.controller.TechniqueAdminController.delLibrary(..))")
+	public Object applyOperator(ProceedingJoinPoint pjp) throws Throwable{
+		  final Object[] args = pjp.getArgs();
+	    final Object result = pjp.proceed();
+	    
+     (1) //进行输出到控制台
+      log.error("报错了吗?");
+	    log.info("没有报错");
+//	    System.out.println(args[0]);
+//	    System.out.println(result);		//redirect:/admin/techniques/librarys
+	    try {
+			
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+	    return result;
+    }
+    
+    
+(2)输出内容 
+: 
+
+10:33:21.244 [qtp644345897-44] ERROR com.hms.jc.aop.TestTechniqueAop - 报错了吗?
+10:33:21.772 [qtp644345897-44] INFO  com.hms.jc.aop.TestTechniqueAop - 没有报错
