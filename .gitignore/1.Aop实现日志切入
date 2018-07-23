@@ -27,10 +27,23 @@ Aspect-OrientedProgramming，面向方面编程 , 可以说是OOP（Object-Orien
   而 Object re = pjp.proceed(); 就是相当于执行了 saveJcOrderInvoice 方法！
   
   定义切点表达式
-  @Around("execution(* com.hms.jc.service.类名.方法名(..))")
+  @Around("execution(* com.hms.jc.service.类名.方法名(..))"){
+  	//z这里写前置增强的代码
+	
+	pjp.proceed();
+	
+	//这里写后置增强的代码
+  }
   
   (2)增强: 
   我们把这个函数体，也就是定义了要做那些事情的代码，称作增强
+  
+    前值增强
+    @Before("execution(* com.hms.jc.service.类名.方法名(..))")
+    public void beforeAdvice() {
+        System.out.println("我是前置增强，很高兴为你服务！");
+    }  
+    
   (3)切面
   而包含切点和增强结合起来就称作切面 
   
