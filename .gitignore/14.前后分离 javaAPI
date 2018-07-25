@@ -17,4 +17,15 @@ SaaS工作台  产品管理
 
 
 
+三 注意事项
 
+(1)拦截器的控制
+
+1.ApiInterceptor
+
+2.RoleInterceptor
+  更改拦截的请求 , 前后分离不进行拦截
+3.NoInInterceptor
+
+
+(2)webPack 反向代理 *****
