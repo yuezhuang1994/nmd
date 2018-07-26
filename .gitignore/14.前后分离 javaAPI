@@ -21,11 +21,32 @@ SaaS工作台  产品管理
 
 (1)拦截器的控制
 
+<mvc:mapping path= "/front/company/**"/>    拦截
+ <mvc:exclude-mapping path="/front/company/catalog/spec"/>   不拦截
+
 1.ApiInterceptor
+取消 catalog 拦截
 
 2.RoleInterceptor
   更改拦截的请求 , 前后分离不进行拦截
 3.NoInInterceptor
-
-
+ 取消begin拦截
+4.LoginInterceptor 
+取消catalog 拦截
 (2)webPack 反向代理 *****
+
+(3)
+postman 传参时候 空格 
+
+
+
+四 放开控制器
+1.servlet.xml 拦截器配置
+2.ProductPortalController.java (获取品牌)
+3.CompanyCatalogPortalController.java (获取行业大小类)
+
+
+
+五  前端路由
+  <iframe src="...../userId="> </iframe>
+  
