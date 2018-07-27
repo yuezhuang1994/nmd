@@ -1,0 +1,89 @@
+一 使用POI 进行开发
+二 使用步骤
+1.pom.xml 中导入POI所有的依赖
+   <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi</artifactId>
+            <version>${poi-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>${poi-version}</version>
+        </dependency>
+		<dependency>
+		    <groupId>org.apache.poi</groupId>
+		    <artifactId>poi-scratchpad</artifactId>
+		    <version>${poi-version}</version>
+		</dependency>
+
+2.前台传递file 后台进行接收 MultipartFile file
+public Map<String, Object> batchAddMaterials(Model model, @RequestParam("upFile") MultipartFile upFile) 
+
+3.
+UpLoadMaterialsService 中 添加属性
+private Workbook workbook;
+private InputStream fileStream;
+提供getset方法
+
+4.创建workBook 工作簿对象实例 并检查
+
+private String getWorkBook(MultipartFile file) {
+
+		String filePath = file.getOriginalFilename();
+		if (StringUtils.isEmpty(filePath)) {
+			return "无文件名！";
+		}
+		if (!filePath.toLowerCase().endsWith(".xls") && !filePath.toLowerCase().endsWith(".xlsx")) {
+			return "文件不是excel类型";
+		}
+		try {
+
+			fileStream = (InputStream) file.getInputStream();
+			if (filePath.toLowerCase().endsWith(".xls")) {
+				workbook = new HSSFWorkbook(fileStream);// 创建 Excel 2003 工作簿对象
+			} else {
+				workbook = new XSSFWorkbook(fileStream);// 创建 Excel 2007 工作簿对象
+			}
+		} catch (Exception e) {
+			try {
+				fileStream.close();
+			} catch (IOException e1) {
+
+			}
+			return "文件解析错误";
+		}
+		return null;
+	}
+  
+ 5.获取 sheet内容 (一个sheet 代表一个表格 excel表中可能有多个表格)
+ 
+ public Map<String,Object> upLoadMaterials(MultipartFile file, UserModel userModel) {
+		errorList.clear();
+		saveList.clear();
+		map.clear();
+		String result = getWorkBook(file);
+		if (StringUtils.isNotEmpty(result)) {
+			map.put("msg",result);
+			return map;
+		}
+		Sheet sheet = workbook.getSheetAt(0);
+		checkOptionAndSave(sheet, userModel);
+		// 遍历sheet，进行数据验证
+		return map;
+	}
+ 
+ 6.处理sheet内容
+ //获取总行数
+ System.out.println(sheet.getLastRowNum());
+ //为跳过第一行目录设置count  
+ int count = 0;
+ 
+ for (Row row : sheet) {
+    //第 i 行 从 0 开始
+    
+    row.getCell(0) 第一列
+    row.getCell(1) 第二列
+ }
+ 
+ 
