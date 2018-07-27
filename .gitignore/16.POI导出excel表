@@ -1,0 +1,243 @@
+1.pom.xml
+2.可以封装一个类 ExportExcel
+属性
+
+//标题
+private String title;
+//列名
+ private String[] rowName ;
+// 数据
+ private List<Object[]>  dataList = new ArrayList<Object[]>();
+ 
+ private HttpServletRequest request;
+    
+ private HttpServletResponse  response;
+ 
+ 
+ 方法
+ 
+ 
+ //构造方法，传入要导出的数据
+public ExportExcel(String title,String[] rowName,List<Object[]>  dataList){
+    this.dataList = dataList;
+    this.rowName = rowName;
+    this.title = title;
+}
+
+/*
+     * 导出数据
+     * */
+public void export() throws Exception{
+    try{
+        HSSFWorkbook workbook = new HSSFWorkbook();                        // 创建工作簿对象
+        HSSFSheet sheet = workbook.createSheet(title);                     // 创建工作表
+
+        //设置列宽
+        sheet.setColumnWidth(0, 6 * 256);  
+        sheet.setColumnWidth(1, 35 * 256);  
+        sheet.setColumnWidth(2, 12 * 256);  
+        sheet.setColumnWidth(3, 24 * 256);  
+        sheet.setColumnWidth(4, 43 * 256);  
+        sheet.setColumnWidth(5, 19 * 256);  
+        sheet.setColumnWidth(6, 12 * 256);  
+        sheet.setColumnWidth(7, 12 * 256);  
+        sheet.setColumnWidth(8, 15 * 256);  
+        sheet.setColumnWidth(9, 21 * 256);  
+        sheet.setColumnWidth(10, 22 * 256);  
+
+        // 产生表格标题行
+        HSSFRow rowm = sheet.createRow(0);
+        HSSFCell cellTiltle = rowm.createCell(0);
+
+        rowm.setHeightInPoints(60);
+
+        //sheet样式定义【getColumnTopStyle()/getStyle()均为自定义方法 - 在下面  - 可扩展】
+        HSSFCellStyle titleStyle = this.getTitleStyle(workbook);
+        HSSFCellStyle columnTopStyle = this.getColumnTopStyle(workbook);//获取列头样式对象
+        HSSFCellStyle style = this.getStyle(workbook);                    //单元格样式对象
+
+        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, (rowName.length-1)));  
+        cellTiltle.setCellStyle(titleStyle);
+        cellTiltle.setCellValue(title);
+
+        //设置公司logo开始-------
+       /* BufferedImage bufferImg = null; 
+        ByteArrayOutputStream byteArrayOut = new ByteArrayOutputStream();     
+        String basePath = request.getServletContext().getRealPath("/");
+
+        bufferImg = ImageIO.read(new File(basePath+"/homePage/img/logo.png"));     
+        ImageIO.write(bufferImg, "png", byteArrayOut);  
+
+        //画图的顶级管理器，一个sheet只能获取一个  
+        HSSFPatriarch patriarch = sheet.createDrawingPatriarch();     
+        //anchor主要用于设置图片的属性  
+        HSSFClientAnchor anchor = new HSSFClientAnchor(50, 50, 255,255,(short)9, 0, (short) 10, 0);  
+        //插入图片    
+        patriarch.createPicture(anchor, workbook.addPicture(byteArrayOut.toByteArray(), HSSFWorkbook.PICTURE_TYPE_PNG));   */
+
+        //设置公司logo结束-----
+
+        // 定义所需列数
+        int columnNum = rowName.length;
+        HSSFRow rowRowName = sheet.createRow(1);                // 在索引2的位置创建行(最顶端的行开始的第二行)
+        rowRowName.setHeightInPoints(25);
+        // 将列头设置到sheet的单元格中
+        for(int n=0;n<columnNum;n++){
+            HSSFCell  cellRowName = rowRowName.createCell(n);                //创建列头对应个数的单元格
+            cellRowName.setCellType(HSSFCell.CELL_TYPE_STRING);                //设置列头单元格的数据类型
+            HSSFRichTextString text = new HSSFRichTextString(rowName[n]);
+            cellRowName.setCellValue(text);                                    //设置列头单元格的值
+            cellRowName.setCellStyle(columnTopStyle);                        //设置列头单元格样式
+        }
+
+        //将查询出的数据设置到sheet对应的单元格中
+        for(int i=0;i<dataList.size();i++){
+
+            Object[] obj = dataList.get(i);//遍历每个对象
+            HSSFRow row = sheet.createRow(i+2);//创建所需的行数
+
+            for(int j=0; j<obj.length; j++){
+                HSSFCell  cell = null;   //设置单元格的数据类型
+                if(j == 0){
+                    cell = row.createCell(j,HSSFCell.CELL_TYPE_NUMERIC);
+                    cell.setCellValue(i+1);    
+                }else{
+                    cell = row.createCell(j,HSSFCell.CELL_TYPE_STRING);
+                    if(!"".equals(obj[j]) && obj[j] != null){
+                        cell.setCellValue(obj[j].toString());                        //设置单元格的值
+                    }else{
+                      cell.setCellValue("");   
+                    }
+                }
+                cell.setCellStyle(style);                                    //设置单元格样式
+            }
+        }
+        //让列宽随着导出的列长自动适应
+/*            for (int colNum = 0; colNum < columnNum; colNum++) {
+            int columnWidth = sheet.getColumnWidth(colNum) / 256;
+            System.out.println(columnWidth);
+            for (int rowNum = 0; rowNum < sheet.getLastRowNum(); rowNum++) {
+                HSSFRow currentRow;
+                //当前行未被使用过
+                if (sheet.getRow(rowNum) == null) {
+                    currentRow = sheet.createRow(rowNum);
+                } else {
+                    currentRow = sheet.getRow(rowNum);
+                }
+                if (currentRow.getCell(colNum) != null) {
+                    HSSFCell currentCell = currentRow.getCell(colNum);
+                    if (currentCell.getCellType() == HSSFCell.CELL_TYPE_STRING) {
+                        int length = currentCell.getStringCellValue().getBytes().length;
+                        if (columnWidth < length) {
+                            columnWidth = length;
+                        }
+                    }
+                }
+            }
+            if(colNum == 0){
+                sheet.setColumnWidth(colNum, (columnWidth-2) * 256);
+            }else{
+                sheet.setColumnWidth(colNum, (columnWidth+4) * 256);
+            }
+        }*/
+
+        if(workbook !=null){
+            try
+            {
+              SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");  
+                String fileName = "vendors" +df.format(new Date())+".xls";
+                String headStr = "attachment; filename=\"" + fileName + "\"";
+                //response = getResponse();
+                response.setContentType("APPLICATION/OCTET-STREAM");
+                response.setHeader("Content-Disposition", headStr);
+                OutputStream out = response.getOutputStream();
+                workbook.write(out);
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+        }
+
+    }catch(Exception e){
+        e.printStackTrace();
+    }
+
+}
+
+总结
+HSSFWorkbook workbook = new HSSFWorkbook();                        // 创建工作簿对象
+HSSFSheet sheet = workbook.createSheet(title);                     // 创建工作表
+// 产生表格标题行
+HSSFRow rowm = sheet.createRow(0);
+HSSFCell cellTiltle = rowm.createCell(0);
+
+//自定义样式 :  sheet样式定义【getColumnTopStyle()/getStyle()均为自定义方法 - 在下面  - 可扩展】
+HSSFCellStyle titleStyle = this.getTitleStyle(workbook);
+HSSFCellStyle columnTopStyle = this.getColumnTopStyle(workbook);//获取列头样式对象
+HSSFCellStyle style = this.getStyle(workbook);                    //单元格样式对象
+
+(1)title赋值
+cellTiltle.setCellStyle(titleStyle);
+cellTiltle.setCellValue(title);
+
+(2)定义列数
+ // 定义所需列数
+int columnNum = rowName.length;
+(3)创建行
+HSSFRow rowRowName = sheet.createRow(1);  //索引2 
+第一行的列 为 列名
+for(int n=0;n<columnNum;n++){
+    HSSFCell  cellRowName = rowRowName.createCell(n);                //创建列头对应个数的单元格
+    cellRowName.setCellType(HSSFCell.CELL_TYPE_STRING);                //设置列头单元格的数据类型
+    HSSFRichTextString text = new HSSFRichTextString(rowName[n]);
+    cellRowName.setCellValue(text);                                    //设置列头单元格的值
+    cellRowName.setCellStyle(columnTopStyle);                        //设置列头单元格样式
+}
+
+其余各行为 数据的值
+//将查询出的数据设置到sheet对应的单元格中
+  for(int i=0;i<dataList.size();i++){
+
+      Object[] obj = dataList.get(i);//遍历每个对象
+      HSSFRow row = sheet.createRow(i+2);//创建所需的行数
+
+      for(int j=0; j<obj.length; j++){
+          HSSFCell  cell = null;   //设置单元格的数据类型
+          if(j == 0){
+              cell = row.createCell(j,HSSFCell.CELL_TYPE_NUMERIC);
+              cell.setCellValue(i+1);    
+          }else{
+              cell = row.createCell(j,HSSFCell.CELL_TYPE_STRING);
+              if(!"".equals(obj[j]) && obj[j] != null){
+                  cell.setCellValue(obj[j].toString());                        //设置单元格的值
+              }else{
+                cell.setCellValue("");   
+              }
+          }
+          cell.setCellStyle(style);                                    //设置单元格样式
+      }
+  }
+
+(4)导出表
+
+if(workbook !=null){
+    try
+    {
+      SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");  
+        String fileName = "vendors" +df.format(new Date())+".xls";      //文件名
+        String headStr = "attachment; filename=\"" + fileName + "\"";   //格式
+        //response = getResponse();
+        response.setContentType("APPLICATION/OCTET-STREAM");
+        response.setHeader("Content-Disposition", headStr);
+        OutputStream out = response.getOutputStream();
+        workbook.write(out);
+    }
+    catch (IOException e)
+    {
+        e.printStackTrace();
+    }
+}
+
+
+
