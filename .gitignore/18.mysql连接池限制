@@ -1,0 +1,81 @@
+一.错误堆栈
+(1)Permission denied  权限拒绝访问
+ Cannot create PoolableConnectionFactory
+ 1.确定服务是启着的
+2.确定网络没问题.
+3.其他软件没把oracle的端口占用，或配置文件里端口号没有写错。
+4.把服务器的防火墙关了，再试一下。
+5.是不是你数据库设置了最大连接，然后其他项目的连接池又把连接占用完了呢。
+
+(2)出现异常”The last packet sent successfully to the server was 0 milliseconds ago.“
+的大部分原因是由于数据库回收了连接，而系统的缓冲池不知道，继续使用被回收的连接所致的。
+
+
+(3) Error creating bean with name 'startupListener' defined in file
+servlet-content.xml 和 technique.xml 从属于不同的容器 
+虽然在servlet-content.xml 配置了自动扫描注入 但在 technique.xml 这个容器中 这些 bean name 是不存在的
+
+(4)java工具类获取配置文件信息
+
+@Component
+public class SpringContextUtil implements ApplicationContextAware, ServletContextAware {
+
+	// Spring应用上下文环境
+	private static ApplicationContext applicationContext;
+
+	private static ServletContext servletContext;
+
+	/**
+	 * 实现ApplicationContextAware接口的回调方法，设置上下文环境
+	 */
+	@Override
+	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+		SpringContextUtil.applicationContext = applicationContext;
+	}
+
+	/**
+	 * @return ApplicationContext
+	 */
+	public static ApplicationContext getApplicationContext() {
+		return applicationContext;
+	}
+
+	public static Object getBean(String beanName) {
+		return SpringContextUtil.applicationContext.getBean(beanName);
+	}
+
+	public static Object getBean(Class beanClass) {
+		return SpringContextUtil.applicationContext.getBean(beanClass);
+	}
+
+	public static ServletContext getServletContext() {
+		return servletContext;
+	}
+
+	@Override
+	public void setServletContext(ServletContext servletContext) {
+		this.servletContext = servletContext;
+	}
+}
+
+base.xml 文件中
+<bean name="globalVariablesCompont" class="com.hms.front.controller.GlobalVariablesCompont">
+        <property name="nmdServiceUrl" value="${nmd.service.url}"/>
+        <property name="appName" value="${appName}"/>
+        <property name="appUrls" value="${appUrls}"/>
+        <property name="appSetCookieUrls" value="${appSetCookieUrls}"/>
+        <property name = "appDelCookieUrls"  value="${appDelCookieUrls}" />
+         <property name="checkCompanyApiUrl" value="${checkCompanyApiUrl}"/>
+        <property name = "getCompanyInfoApiUrl"  value="${getCompanyInfoApiUrl}" />
+        <property name="getEnterpriseInfoApiUrl" value="${getEnterpriseInfoApiUrl}"/>
+        <property name="searchUrl" value="${searchUrl}"/>
+        <property name="collegeUrl" value="${collegeUrl}"/>
+        <property name="newsUrl" value="${newsUrl}"/>
+        <property name = "checkCompanyValidApiUrl"  value="${checkCompanyValidApiUrl}" />
+        <property name = "resourceDomain"  value="${resourceDomain}" />
+    </bean>
+
+使用 
+GlobalVariablesCompont compont = (GlobalVariablesCompont) SpringContextUtil.getBean("globalVariablesCompont");
+// 配置的globalVariablesCompont bean
+String resourceDomain = compont.getResourceDomain()
