@@ -1,0 +1,68 @@
+一 什么是Swagger?
+Swagger 是一个规范而且完整的框架,这个集合涵盖了从终端用户接口,底层代码库 到商业API管理的 方面
+API文档应该有直接运行的能力
+
+二 使用方法
+1.在pom.xml中添加相关的依赖
+<!-- swagger-mvc -->
+        <dependency>
+            <groupId>com.mangofactory</groupId>
+            <artifactId>swagger-springmvc</artifactId>
+            <version>1.0.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.6.6</version>
+        </dependency>
+        <!-- swagger-mvc -->
+2.自定义对Swagger 的配置
+public class SwaggerConfig extends WebMvcConfigurerAdapter {
+
+    private SpringSwaggerConfig springSwaggerConfig;
+
+    @Autowired
+    public void setSpringSwaggerConfig(SpringSwaggerConfig springSwaggerConfig) {
+        this.springSwaggerConfig = springSwaggerConfig;
+    }
+
+    /**
+     * 链式编程 来定制API样式 后续会加上分组信息
+     * 
+     * @return
+     */
+    @Bean
+    public SwaggerSpringMvcPlugin customImplementation(){
+           return new SwaggerSpringMvcPlugin(this.springSwaggerConfig)
+                    .apiInfo(apiInfo())
+                    .includePatterns(".*?");
+    }
+
+    private ApiInfo apiInfo() {
+        ApiInfo apiInfo = new ApiInfo("API接口测试平台",
+                "提供后台所有Restful接口", "www.flyeast.top",
+                "shexd1001@gmail.com", "β客栈", "www.flyeast.top");
+        return apiInfo;
+    }
+
+    @Override
+    public void configureDefaultServletHandling(
+            DefaultServletHandlerConfigurer configurer) {
+        configurer.enable();
+    }
+}
+
+3.注入SwaggerConfig 类
+ <!-- swagger配置信息 -->
+ <bean class="com.mangofactory.swagger.configuration.SpringSwaggerConfig" />
+
+4.注解的使用
+
+5.对Swagger -UI 进行配置
+Swagger 扫描解析得到的是一个json 文档 使用起来不方便, 但是通过 swagger - UI , 可以友好的展示解析得到的接口内容
+修改index.HTML文件
+
+
+6.
+运行,访问index.HTML
+
