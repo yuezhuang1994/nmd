@@ -65,4 +65,212 @@ Swagger 扫描解析得到的是一个json 文档 使用起来不方便, 但是�
 
 6.
 运行,访问index.HTML
+-- -----------------------------------------------------------------------------------------------------
+
+公司版
+一: Swagger setting
+1、import jar
+		<!--swagger begin -->
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger-ui</artifactId>
+            <version>2.6.1</version>
+        </dependency>
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger2</artifactId>
+            <version>2.6.1</version>
+        </dependency>
+    	<!-- jackson用于将springfox返回的文档对象转换成JSON字符串 -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>2.6.5</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.6.5</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>2.6.5</version>
+        </dependency>
+        <!-- swagger end -->
+重点 :
+(1) Marty Pitt编写了一个基于Spring的组件swagger-springmvc  ,而springfox则是从这个组件发展而来,springfox是一个新的项目,
+(2)使用其中的一个组件springfox-swagger2 , springfox依赖 OSA规范 , 也就是描述api的json文件 , 这个组件的功能是帮助我们生成 json文件.
+(3)另一个组件springfox-swagger-ui 就是将这一个json文件友好的解析出来 
+(4) springfox 提供了Docket 类 , 我们需要把它做成一个bean 注入到spring中
+(5)描述   API,springfox 允许 我们将信息组合成一个APIInfo类,作为构造参数传递给Docket(当然也可以不构造这个类,直接使用null, 这样你就太low了)
+(6) swagger 提供了 页面测试功能 来调试每个 RESTful API
+
+2、SwaggerConfig.java 
+package com.hms.config;
+
+import com.hms.util.PropertiesHelper;
+import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.DefaultServletHandlerConfigurer;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import springfox.documentation.builders.ApiInfoBuilder;
+import springfox.documentation.builders.PathSelectors;
+import springfox.documentation.builders.RequestHandlerSelectors;
+import springfox.documentation.service.ApiInfo;
+import springfox.documentation.service.Contact;
+import springfox.documentation.spi.DocumentationType;
+import springfox.documentation.spring.web.plugins.Docket;
+import springfox.documentation.swagger2.annotations.EnableSwagger2;
+
+@Configuration
+@EnableSwagger2
+public class SwaggerConfig {
+
+    @Bean
+    public Docket commonDock() {
+        if (StringUtils.isNotBlank(PropertiesHelper.getPropertiesHelper().getConfigElement("swagger.show"))
+                && "test".equals(PropertiesHelper.getPropertiesHelper().getConfigElement("swagger.show"))) {
+            return new Docket(DocumentationType.SWAGGER_2)
+                    .groupName("柠檬豆玺品API接口文档")
+                    .apiInfo(apiInfo("玺品接口文档"))
+                    .select()
+                    .apis(RequestHandlerSelectors.basePackage("com.hms.api.newInterface.sixin"))
+                    .paths(PathSelectors.any())
+                    .build();
+        } else {
+            return new Docket(DocumentationType.SWAGGER_2)
+                    .groupName("test1")
+                    .select()
+                    .paths(PathSelectors.none())
+                    .build();
+        }
+    }
+
+//    @Bean
+//    public Docket commonDock2() {
+//        if (StringUtils.isNotBlank(PropertiesHelper.getPropertiesHelper().getConfigElement("swagger.show"))
+//                && "test".equals(PropertiesHelper.getPropertiesHelper().getConfigElement("swagger.show"))) {
+//            return new Docket(DocumentationType.SWAGGER_2)
+//                    .groupName("柠檬豆集采模块API接口文档")
+//                    .apiInfo(apiInfo("集采接口文档"))
+//                    .select()
+//                    .paths(PathSelectors.ant("/jc/**"))
+//                    .build();
+//        } else {
+//            return new Docket(DocumentationType.SWAGGER_2)
+//                    .groupName("test2")
+//                    .select()
+//                    .paths(PathSelectors.none())
+//                    .build();
+//        }
+//    }
+
+    /**
+     * api 信息
+     *
+     * @param desc
+     * @return
+     */
+    public ApiInfo apiInfo(String desc) {
+        return new ApiInfoBuilder()
+                .title("柠檬豆API接口文档")
+                .description(desc)
+                .contact(contact())
+                .termsOfServiceUrl("http://localhost:8080")
+                .version("1.0.1").build();
+    }
+
+    private Contact contact() {
+        return new Contact("柠檬豆", "www.ningmengdou.com", "Service@ningmengdou.com");
+    }
+
+}
+
+注意:
+        SwaggerConfig 类 的注解
+
+        @Configuration spring 的注解,让spring来加载该类配置
+        @EnableSwagger2 : 启动Swagger 支持,表示这是一个swagger 配置文件
+        Docket 可以返回多个 , 扫描不同的包
+
+3.static resources(servlet-context.xml)  资源文件
+
+        1、<!--Request processing--> 引入
+        <mvc:resources location="classpath:/META-INF/resources/" mapping="swagger-ui.html"/>    页面
+        <mvc:resources location="classpath:/META-INF/resources/webjars/" mapping="/webjars/**"/>        css文件等
+        2、<!-- global interceptor --> 放开全局 拦截器
+        <mvc:exclude-mapping path="/swagger-ui.html"/>
+        <mvc:exclude-mapping path="/webjars/**"/>
+
+
+4、Environment configuration(config.properties)  //为了区分开发和生产环境 , 生产环境不进行显示文档
+        swagger.show=test(develop、test)
+        swagger.show=etc(Formal environment)
+
+5 .编写swagger注解
+  (1)实体类
+  
+@ApiModel()用于类 ；表示对类进行说明，用于参数用实体类接收 
+value–表示对象名 
+description–描述 
+都可省略 
+@ApiModelProperty()用于方法，字段； 表示对model属性的说明或者数据操作更改 
+value–字段说明 
+name–重写属性名字 
+dataType–重写属性类型 
+required–是否必填 
+example–举例说明 
+hidden–隐藏
+
+@ApiModel(value="user对象",description="用户对象user")
+public class User implements Serializable{
+    private static final long serialVersionUID = 1L;
+     @ApiModelProperty(value="用户名",name="username",example="xingguo")
+     private String username;
+     @ApiModelProperty(value="状态",name="state",required=true)
+      private Integer state;
+      private String password;
+      private String nickName;
+      private Integer isDeleted;
+
+      @ApiModelProperty(value="id数组",hidden=true)
+      private String[] ids;
+      private List<String> idList;
+     //省略get/set
+}
+@ApiIgnore()用于类或者方法上，可以不被swagger显示在页面上 
+比较简单, 这里不做举例
+
+@ApiImplicitParam() 用于方法 
+表示单独的请求参数 
+@ApiImplicitParams() 用于方法，包含多个 @ApiImplicitParam 
+name–参数ming 
+value–参数说明 
+dataType–数据类型 
+paramType–参数类型 
+example–举例说明
+
+  @ApiOperation("查询测试")
+  @GetMapping("select")
+  //@ApiImplicitParam(name="name",value="用户名",dataType="String", paramType = "query")
+  @ApiImplicitParams({
+  @ApiImplicitParam(name="name",value="用户名",dataType="string", paramType = "query",example="xingguo"),
+  @ApiImplicitParam(name="id",value="用户id",dataType="long", paramType = "query")})
+  public void select(){
+
+  }
+
+6 注意的问题,
+接口需要的实体类 , 一定不要进行嵌套 , 否则会死循环.
+只写入需要的字段
+
+
+
+
 
