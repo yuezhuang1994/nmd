@@ -49,4 +49,7 @@ postman 传参时候 空格
 
 五  前端路由
   <iframe src="...../userId="> </iframe>
+  <iframe src="/api/front/product/index.html#product/list/${userId}"></iframe>
+  index.html : 前端打包好文件放在后台项目中 进行访问
+  #product/list : 前端路由
   
