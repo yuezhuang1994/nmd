@@ -1,0 +1,16 @@
+一   全文搜索 , 开元的elasticsearch 是目前全文搜索引擎的首选
+1.可以快速的存储 , 分析 , 搜索 海量数据 github 维基百科 都采用它 
+2.elastic 底层基于 Lucene , 没办法直接使用Lucene , 必须自己写程序去调用接口 , Elastic 是对 Lucene 的封装 , 提供了操作rest Api 操作接口,开箱即用.
+
+二   安装
+
+
+三   基本概念
+elastic 本质上是一个分布式的数据库 , 单个elastic 实例称为 一个 节点 node . 一组节点称为一个集群 cluster ,
+Elastic 数据管理的顶层单位就叫做 Index（索引）。它是单个数据库的同义词。每个 Index （即数据库）的名字必须是小写。,
+Index里面的单条 记录称为 document 
+
+1.node : 节点
+2.cluster : 集群
+3.inverted index: 反向的 索引
+4.document : 文档
