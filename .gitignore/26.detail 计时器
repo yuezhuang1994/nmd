@@ -1,0 +1,27 @@
+/**计时器
+ * */
+function countTime() {  
+	var endDate = new Date(product.priceEndTime);     //结束时间    
+	var end = endDate.getTime();                      //结束时间  毫秒数
+	var leftTime = end-now;                           //结束时间- 当前时间
+	var d=0,h=0,m=0,s=0;  
+	if (leftTime>0) {
+	    d = Math.floor(leftTime/1000/60/60/24);       //剩余天数
+	    h = Math.floor(leftTime/1000/60/60%24);       //剩余小时
+	    m = Math.floor(leftTime/1000/60%60);          //剩余分钟
+	    s = Math.floor(leftTime/1000%60);             //剩余秒
+	    
+	    $('span[class=sp_d_dcount]').text(d);
+		$('span[class=sp_t_dcount]').text((h<10?("0" + h):h)+":"+(m<10?("0" + m):m)+":"+(s<10?("0" + s):s));
+
+		now+=1000;
+        setTimeout(countTime,1000);                 //1000毫秒 (1秒)执行一次
+    }else{
+    	$('span[class="sp_proname"]').prev().text("已下架");
+    	$('span[class="sp_proname"]').prev().attr("class","sp-label label-gray");
+    	
+    	$('span[class=sp_d_dcount]').parent().hide();
+    	$('#orderBtn').prop("disabled",true); 
+    }
+}  
+countTime();
