@@ -78,3 +78,7 @@
 4.程序中使用 
 
 private static Logger log = LoggerFactory.getLogger(JcOrderLogAop.class);
+
+
+文档地址
+https://www.cnblogs.com/leecong/p/5776970.html
