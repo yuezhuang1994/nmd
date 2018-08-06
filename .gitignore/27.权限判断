@@ -1,0 +1,46 @@
+1.场景
+檬豆商城对于 商品进行下单 操作 ,
+
+使用拦截器进行操作 URL的拦截 , 判断用户是否具有权限
+(1)servlet.context.xml
+   <mvc:interceptor>
+		    <mvc:mapping path="/jc/common/createOrderCheck" />
+		    <mvc:mapping path="/jc/front_product/collect" />
+		    
+			<bean class="com.hms.jc.interceptor.JCCompanyInterceptor"/>
+		</mvc:interceptor>
+    
+		<!-- 集采采购权限拦截 -->
+		<mvc:interceptor>
+		    <mvc:mapping path="/jc/common/createOrderCheck" />
+		    <mvc:mapping path="/jc/front_product/collect" />
+		    
+			<bean class="com.hms.jc.interceptor.JCBuyerPrivilegeInterceptor"/>
+		</mvc:interceptor>
+    
+    
+    
+(2)js
+  var callFunc = function(response){
+		 if(response.status == '000000'){
+			  window.location.href="/jc/buyer_order/create?productId="+inputObj.attr("data-id")+"&count="+inputObj.val();
+		 }else if(response.status == '300000'){
+				 window.location.href="/front/user/login.jsp";
+		 }else if(response.status == '100000'){
+			 showInfoFuncAndBtnLabel("我还没有创建或关联自己的企业。",function(){window.location.href="/front/user/registerRole.jsp"},"现在就去");
+		 }else if(response.status == '100001'){
+			 showInfo("企业状态异常，联系客服解决：<br/>4008-939-365");
+		 }else if(response.status == '100006'){
+			 showInfoFuncAndBtnLabel("还没有集采权限，签约集采企业版。",function(){window.location.href="/front/company/sign/productSign"},"现在就去");
+		 }else{
+			 showInfo(response.message);
+		 }
+	 }
+	 post("/jc/common/createOrderCheck",postData,callFunc);
+
+(3)    JCCompanyInterceptor.java  
+    
+          returnMap.put("status", StatusCode.CODE_100006.code);
+					returnMap.put("message", StatusCode.CODE_100006.message);
+					this.dumpError(request, response, returnMap);
+					return false;
