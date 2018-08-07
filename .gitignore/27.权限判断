@@ -44,3 +44,84 @@
 					returnMap.put("message", StatusCode.CODE_100006.message);
 					this.dumpError(request, response, returnMap);
 					return false;
+!!!!!!!!!!!!!!!!!!!!!!!!特别重要 , 进行信息的完善
+2.header .jsp
+
+(1) 引入小脚本文件 , 取值
+<%@page import="com.hms.util.SpringContextUtil"%>
+<%@page import="com.hms.front.controller.GlobalVariablesCompont"%>
+<%
+	GlobalVariablesCompont compontInfo = (GlobalVariablesCompont) SpringContextUtil.getBean("globalVariablesCompont");
+	String appDelCookieUrls = compontInfo.getAppDelCookieUrls();
+%>
+
+(2)个人信息
+
+ <div id="onlineUser" class="color-orange hello"></div>
+<div id="companyStatus" class="d-role d-role1"></div>
+	
+(3) 脚本获取用户信息 和 用户权限
+<jsp:include page="../platform-init.jsp"></jsp:include> 引入弹窗jsp
+<!-- 获取用户信息和用户菜单权限 -->
+<script type="text/javascript">
+$(function() {
+	function initUser(){
+
+		$("#onlineUser").html("你好！" + ((curUser.nickName!=null && curUser.nickName !='' ?curUser.nickName:(curUser.name!=null && curUser.name != ''?curUser.name:curUser.phone))));
+		if (curUser.imageId) {
+			var imageSrc = "/api/comm/findImage?id=" + curUser.imageId;
+			$("#user_logo").attr("src",imageSrc);
+		}
+		if(ownRole=="ALL"){
+			if(curRole=="jcBuyer"){
+				$("#companyStatus").html("切换到供应商");
+				$('.d-role').on("click", function() { 
+					var targetType = "supplier";
+					var postData = {type : targetType};
+					var callFunc = function(response){
+						if(response.result===true){
+							window.location.href="/jc/supplier_product/list";
+						}else{
+							$('#'+targetType+'Dialog').modal("show");
+						}
+					}
+					post("/jc/common/initCheck",postData,callFunc);		//进行权限的验证
+				}); 
+			}else{
+				$("#companyStatus").html("切换到采购商");
+				$('.d-role').on("click", function() { 
+					var targetType = "buyer";
+					var postData = {type : targetType};
+					var callFunc = function(response){
+						if(response.result===true){
+							window.location.href="/jc/buyer_product_match/list";
+						}else{
+							$('#'+targetType+'Dialog').modal("show");
+						}
+					}
+					post("/jc/common/initCheck",postData,callFunc);
+				}); 
+			}
+		}else if(ownRole=="BUYER"){
+			$("#companyStatus").html("采购商");
+		}else if(ownRole=="SUPPLIER"){
+			$("#companyStatus").html("供应商");
+		}
+		$('#'+curRole+'Menu').show();
+	}
+	initUser();
+});
+</script>
+
+(4) 弹窗 内容 platform-init.jsp
+<!-- 采购商完善信息弹窗 -->
+<div class="modal fade" tabindex="-1" role="dialog" id="buyerDialog">
+</div>
+
+<!-- 供应商完善信息弹窗 -->
+<div class="modal fade" tabindex="-1" role="dialog" id="supplierDialog">
+</div>
+
+
+
+
