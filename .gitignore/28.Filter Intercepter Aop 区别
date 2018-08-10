@@ -79,3 +79,9 @@ public class ApiFilter implements Filter {
 2.配置顺序 : 监听器(Lister) > Filter > Servlet
 
 
+二 Intercepter 拦截器
+概念: 拦截器 是动态拦截Action 调用的对象, 可以使 在执行Action 的前后执行一段代码
+
+
+
+
