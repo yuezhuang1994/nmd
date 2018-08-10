@@ -1,0 +1,62 @@
+
+1.java后台
+(1)List 对象
+private List<ProductProperty> productProperties = new ArrayList<>();
+前台显示 : 数组
+"productProperties": [
+            {
+                "id": 1519481,
+                "product0Id": 177236,
+                "productSpecItemId": 1320,
+                "value": "0",
+                "productSpecUnitItemId": 32,
+                "updatedAt": 1533805444000,
+                "createdAt": 1533805444000
+            },
+            {
+                "id": 1519482,
+                "product0Id": 177236,
+                "productSpecItemId": 1002,
+                "value": "-3",
+                "productSpecUnitItemId": 32,
+                "updatedAt": 1533805444000,
+                "createdAt": 1533805444000
+            },
+}
+(2)list string
+private List<String> tagList = new ArrayList<String>();
+前台显示
+"tagList": [
+    "停产"
+]
+
+(3)普通属性
+"id": 177197
+
+(4)对象
+"product0": {
+        "id": 177236,
+        "productId": 177197,
+        "version": 1,
+        "userId": 144,
+        "companyId": 5030,
+        "catalogId": 3,
+        "model": "2",
+        "brandId": 5,
+        "name": null
+}
+
+(5)Map 集合
+
+private Map<String, String> customProperties = new LinkedHashMap<>();
+前台展示
+"standardProperties": {
+    "1002": "-3",
+    "1003": "384",
+    "1004": "392",
+    "1005": "399",
+    "1320": "0",
+    "1321": "0"
+}
+
+
