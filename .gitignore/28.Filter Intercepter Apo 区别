@@ -1,0 +1,81 @@
+一 Filter
+Filter 称之为 过滤器, 是servlet 中最实用的技术之一.
+
+作用:
+(1)通过Filter 技术 , 对web服务器 管理的所有资源, 例如 jsp, servlet(控制器等),静态资源 等进行拦截
+(2)对用户的请求进行预处理, 也可以对HttpServletResponse 进行后处理.
+(3)完整流程: Filter 对用户请求进行预处理---将请求交给 Servlet 进行处理并产生响应----Filter对服务器响应进行后处理
+
+2. 使用步骤
+(1)编写 类 实现Filter 接口 , 实现 doFilter 方法
+public class ApiFilter implements Filter {
+    private Logger logger = LoggerFactory.getLogger(ApiFilter.class);
+    
+    //1.初始化
+    @Override
+    public void init(FilterConfig filterConfig) throws ServletException {
+    	
+    }
+    
+    //2.预处理请求
+    @Override
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+            throws IOException, ServletException {
+        HttpServletRequest req = (HttpServletRequest) request;
+        HttpServletResponse resp = (HttpServletResponse) response;
+
+        callChain(req, resp, chain);
+    }
+
+    //3.处理过程 并 放行
+    private void callChain(HttpServletRequest request, HttpServletResponse response, FilterChain chain) {
+        try {
+            chain.doFilter(request, response);    //放行 , 交给下一个监听器
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ServletException e) {
+            e.printStackTrace();
+        }
+    }
+  
+  
+    4.销毁
+    @Override
+    public void destroy() {
+    }
+}
+(2) web.xml 文件进行配置
+     <1>
+    <filter>   //指定一个过滤器
+        <filter-name>apiFilter</filter-name>    //名字
+        <filter-class>com.hms.filter.ApiFilter</filter-class>   //完整类名
+        <async-supported>true</async-supported>
+    </filter>
+    <filter-mapping>  //拦截的资源
+        <filter-name>apiFilter</filter-name>  //申明的过滤器的名称
+        <url-pattern>/api/*</url-pattern>     //拦截的请求路径
+    </filter-mapping>
+    <2>
+   <filter>
+        <filter-name>encodingFilter</filter-name>
+        <filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+        <init-param>    //初始化参数
+            <param-name>encoding</param-name>
+            <param-value>UTF-8</param-value>
+        </init-param>
+        <init-param>
+            <param-name>forceEncoding</param-name>
+            <param-value>true</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>encodingFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+注意事项
+
+1. 一个web应用中可以写多个Filter,根据web.xml 文件中的注册顺序进行执行
+2.配置顺序 : 监听器(Lister) > Filter > Servlet
+
+
