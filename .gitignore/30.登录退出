@@ -1,0 +1,52 @@
+1.登录后保存cookie (没有用到session)
+保存四个信息
+
+/**
+	 * 创建TOKEN
+	 * 
+	 * @param baseForm
+	 * @param request
+	 * @return
+	 */
+	public boolean createToken(BaseForm baseForm, HttpServletRequest request, HttpServletResponse response) {
+		String ip = CommUtil.getIpAddr(request);
+		Long userId = baseForm.getUserId();
+		String deviceId = baseForm.getDeviceId();
+		StringBuffer newToken = new StringBuffer();
+		newToken.append(userId).append(CommEntity.SPLIT_FLAG).append(deviceId).append(CommEntity.SPLIT_FLAG)
+				.append(System.currentTimeMillis()).append(CommEntity.SPLIT_FLAG).append(ip);
+
+		String newTokenE = KeyUtil.encrypt(newToken.toString());
+		request.setAttribute("newToken", newTokenE);
+
+		int age = (int) request.getAttribute("autoLogin");
+		WebUtil.addCookie(response, "autoLogin", age + "", "/", age, false);
+		WebUtil.addCookie(response, "token", newTokenE, "/", age, false);
+		WebUtil.addCookie(response, "userId", userId.toString(), "/", age, false);
+		WebUtil.addCookie(response, "userRoleType", baseForm.getUserRoleType(), "/", age, false);
+		WebUtil.addCookie(response, "techniqueRoleType", baseForm.getTechniqueRoleType(), "/", age, false);
+		return true;
+	}
+
+
+2.退出时 清除四个状态
+
+var exit = function() {
+	// 调用接口 清除登录状态
+	for(var i = 0 ;i < delCookieUrls.length ;i++){    //清除三个 域名下面的cookie 信息
+	    $.ajax({  
+	    	type:"get",  
+	    	dataType:"jsonp",
+	    	crossDomain:true,
+	    	jsonp: "callbackparam",
+	    	url: delCookieUrls[i] ,
+	    });	           
+    }
+	setTimeout(function(){
+		Cookie.delCookie('userId');
+		Cookie.delCookie('scoreofinfoTag2');
+		Cookie.delCookie('userRoleType');
+		Cookie.delCookie('techniqueRoleType');
+		window.location = "/";
+    },500);	   
+}
