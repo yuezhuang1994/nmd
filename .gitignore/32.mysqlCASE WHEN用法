@@ -1,0 +1,14 @@
+1.case 搜索函数 , 允许对结果集进行替换
+
+例:
+
+case 字段 when 条件一 then 结果一  when 条件二 then  结果二  end as 字段;
+
+SELECT id,user_id, CASE status when 'ACTIVE' then '审核通过' when 'PENDING' then '审核中' when 'NOPEND' then '审核未通过' END AS status  
+
+from user_identity_sign_log limit 100;
+
+id  user_id  status
+1    144       审核通过
+2    145       审核中
+
