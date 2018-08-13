@@ -1,6 +1,6 @@
 1.case 搜索函数 , 允许对结果集进行替换
 
-例:
+例:判断相等
 
 case 字段 when 条件一 then 结果一  when 条件二 then  结果二 else '结果三'  end ;
 
@@ -20,7 +20,7 @@ id  user_id  status
 
 
 
-2.条件查询 
+2.条件查询  判断条件
 
 case  when 条件一 then 条件一 when 条件二 then 条件二 else 条件三 end 
 
