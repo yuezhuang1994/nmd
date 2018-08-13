@@ -2,7 +2,7 @@
 
 例:
 
-case 字段 when 条件一 then 结果一  when 条件二 then  结果二  end as 字段;
+case 字段 when 条件一 then 结果一  when 条件二 then  结果二  end as 字段(别名也行);
 
 SELECT id,user_id, CASE status when 'ACTIVE' then '审核通过' when 'PENDING' then '审核中' when 'NOPEND' then '审核未通过' END AS status  
 
