@@ -1,0 +1,86 @@
+<c:if test="${isLogin}">
+  <li><a href="/front/user/message" target="_blank"><i
+        class="icon iconfont icon-youjian"></i>消息<span class="color-orange" id="messageSpan"></span></a></li>
+  <li class="left-solid border-grey li-user"><a
+      href="/front/user/center" target="_blank"><i
+        class="icon iconfont icon-yonghu"></i>你好，<span id="userSpan"></span></a>
+  </li>
+  <li><a href="javascript:exit();" style="padding-right: 0px;"><i
+        class="icon iconfont icon-exit"></i>退出</a></li>					
+</c:if>
+
+单纯的文本显示
+
+1.header.js
+
+if(Cookie.getCookie("userId")) {
+		// 获取用户信息
+		JsUtil.request("/api/user/getUserInfo", {}, function(data) {
+			if (data) {
+				var result = data;
+				if (result.name) {
+					$("#userSpan").html(result.nickName?result.nickName:(result.name?result.name:result.phone));
+				} else {
+					$("#userSpan").html(result.nickName?result.nickName:(result.name?result.name:result.phone));
+				}
+				
+				// 消息数量
+				JsUtil.request("/api/noticeBiz/countByCompanyId",{},function(result){
+					JsUtil.request("/api/noticeSys/countByCompanyId",{},function(result2){
+						var count = result + result2;
+						if (count != 0) {
+							$("#messageSpan").html(count);
+						}
+					})
+				})
+			}
+		})		
+	}
+  
+  - ------------------------------------------------------------------------------------------------------------------
+  
+  
+  <div class="logo-font">
+				<p>${userModel.company.name}</p>
+				<a href="javascript:void(0)">工作台</a>
+				<div class="d-note"  id="versionTitle">
+				</div>
+		  </div>
+  
+  
+2. 工作台签约版本的显示
+
+if(versionMap && centerItems !="null"){
+	var versionHtml="";
+/* 	if(versionMap.jc){
+		versionHtml += "<p>"+versionMap.jc.jcVersion.name+"&nbsp;("+getFormatDateByLong(versionMap.jc.startTime,"yyyy-MM-dd")+")</p>";
+	} */
+	
+	if(versionMap.sys){
+		versionHtml+="<p>"+versionMap.sys.sysVersion.name+"&nbsp;("+getFormatDateByLong(versionMap.sys.startTime,"yyyy-MM-dd")+")</p><p><a class=\"a-version\">版本更新日志</a></p>";
+	}
+	
+	$("#versionTitle").html(versionHtml);
+}
+
+3.后台使用
+Map <String , Object> version=new hashMap<String , Object>();
+
+
+public Map<String,Object> getCompanyVersionTitle(){
+		Map<String,Object> versionMap = null;
+		UserModel userModel = getCurrentUserModel();
+		Company relationCompany = userModel.getRelationCompany();
+		
+		if(relationCompany != null){
+			SysVersionCompanyModel sysVersionCompanyModel = sysVersionCompanyService.load(relationCompany.getId());
+			JcCompanyVersionModel jcCompanyVersionModel = jcCompanyVersionService.loadCompanyVersion(relationCompany.getId());
+			
+			versionMap = new HashMap<String,Object>();
+			versionMap.put("sys", sysVersionCompanyModel);
+			versionMap.put("jc", jcCompanyVersionModel);
+		}
+		
+		return versionMap;
+	}
+
