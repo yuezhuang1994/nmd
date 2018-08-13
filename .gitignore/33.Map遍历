@@ -1,3 +1,48 @@
 
 1.最常用的Map,它根据键的HashCode 值存储数据,根据键可以直接获取它的值，具有很快的访问速度。HashMap最多只允许一条记录的键为Null(多条会覆盖);允许多条记录的值为 Null。非同步的。
 
+关键属性
+ transient Node[] table;//存储元素的实体数组
+  
+ transient int size;//存放元素的个数
+  
+ int threshold; //临界值   当实际大小超过临界值时，会进行扩容threshold = 加载因子*容量
+ 
+ final float loadFactor; //加载因子
+  
+ transient int modCount;//被修改的次数
+ 接口
+  Map.Entry
+ 内部类
+  Node 实现接口, 存储map数据
+  
+ 
+ //遍历
+		//1.Map.Entry<> 方式进行遍历
+		for (Map.Entry<String, Object> entry : map.entrySet()) {
+			System.out.println(entry.getKey()+"--"+entry.getValue());
+		}
+		//2.利用迭代器
+		Iterator<Map.Entry<String, Object>> iterator=map.entrySet().iterator();
+		while(iterator.hasNext()) {
+			Map.Entry<String, Object> entry=iterator.next();
+			System.out.println(entry.getKey()+"--"+entry.getValue());
+		}
+		
+		//3.迭代器不适用泛型
+		Iterator iterator2=map.entrySet().iterator();
+		while (iterator2.hasNext()) {
+			Map.Entry<String, Object> entry=(Map.Entry<String, Object>)iterator2.next();
+			System.out.println(entry.getKey()+"--"+entry.getValue());
+		}
+		
+		//4.遍历key
+		
+		for (String string : map.keySet()) {
+			System.out.println(string);
+		}
+		
+		//5.遍历value
+		for (Object object : map.values()) {
+			System.out.println(object);
+		}
