@@ -69,3 +69,10 @@ if(otherProduct[2]){countDown(otherProduct[2].priceEndTime,function(msg){$(".oth
 if(otherProduct[3]){countDown(otherProduct[3].priceEndTime,function(msg){$(".otherproduct"+3).html(msg)});}
 if(otherProduct[4]){countDown(otherProduct[4].priceEndTime,function(msg){$(".otherproduct"+4).html(msg)});}
 if(otherProduct[5]){countDown(otherProduct[5].priceEndTime,function(msg){$(".otherproduct"+5).html(msg)});}
+
+
+注意点:
+
+不能进行循环, 否则会报错
+
+
