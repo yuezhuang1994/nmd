@@ -14,7 +14,7 @@ from user_identity_sign_log limit 100;
 
 
 
-id  user_id  status
+id  user_id     状态
 1    144       审核通过
 2    145       审核中
 
