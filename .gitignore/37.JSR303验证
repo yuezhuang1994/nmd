@@ -59,5 +59,9 @@ public class SessionController extends BaseController {
 	}
 
 
+-- -----
+spring 标签库 或者 自定义 都可以在前台进行处理
+
+
 
 
