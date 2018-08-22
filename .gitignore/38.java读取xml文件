@@ -1,0 +1,29 @@
+1.
+    //执行链接
+      response = getClient().execute(post);     
+      //spring解析结果
+      HttpEntity entity = response.getEntity();
+			String returnString=EntityUtils.toString(entity, "UTF-8");
+			//spring解析xml文档
+      Document doc = DocumentHelper.parseText(returnString);
+			// 获取根节点
+			Element rootElt = doc.getRootElement();
+			// 获取根节点下的子节点的值
+			String returnstatus = rootElt.elementText("returnstatus").trim();
+			if(returnstatus.equals("Success")) {
+				Result result = new Result(returnString, null, 0, null);
+				return result;
+			}
+      
+      
+xml 文档
+
+HTTP/1.1 200 OK
+<?xml version="1.0" encoding="utf-8" ?>
+<returnsms>
+    <returnstatus>Success</returnstatus>
+    <message>操作成功</message>
+    <remainpoint>19977</remainpoint>
+    <taskID>1808224215194285</taskID>
+    <successCounts>1</successCounts>
+</returnsms>
