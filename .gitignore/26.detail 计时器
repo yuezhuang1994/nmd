@@ -27,9 +27,6 @@ function countTime() {
 countTime();
 
 
-
-
-
 /**
  * 广告计时器
  */
@@ -70,9 +67,13 @@ if(otherProduct[3]){countDown(otherProduct[3].priceEndTime,function(msg){$(".oth
 if(otherProduct[4]){countDown(otherProduct[4].priceEndTime,function(msg){$(".otherproduct"+4).html(msg)});}
 if(otherProduct[5]){countDown(otherProduct[5].priceEndTime,function(msg){$(".otherproduct"+5).html(msg)});}
 
-
 注意点:
 
 不能进行循环, 否则会报错
+-- -----------------------------------------------------------------------
+setTimeOut(fn , time);  在指定的时间后只执行一次
+setIntevel(fn , time);  周期执行
+
+
 
 
