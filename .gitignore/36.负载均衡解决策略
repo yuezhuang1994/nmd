@@ -28,3 +28,17 @@
      keepalived会通过一 个setsockopt呼叫通知内核将这个节点从LVS拓扑图中移除。
   (6)memcached
     高性能 分布式内存对象缓存系统. 
+
+-- ---------------------------------------------------------------------------
+demo
+
+nmd 解决负载均衡
+(1) 服务器
+静态文件:     AliyunOSS
+js/ajax :     nginx/1.8.0
+php/htm:      Tengine
+gif:          apache
+js :          lighttpd
+
+
+
