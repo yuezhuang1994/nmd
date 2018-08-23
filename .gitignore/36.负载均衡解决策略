@@ -41,16 +41,20 @@ gif:          apache
 js :          lighttpd
 
 
-Nginx 服务器 : 第一层 CPU好
-反向代理服务器: 两台  CPU好 (应用服务器)    (Nginx 服务器也可以用作反向代理服务器)
+Nginx 服务器 : 第一层 CPU好 (接受http请求)
+反向代理服务器: 两台  CPU好 (应用服务器 处理业务逻辑)    (Nginx 服务器也可以用作反向代理服务器)
 
 
 数据库服务器 :  多台   高可用  8核16G
 
 
 
+--   ------常用的web 服务器和  (web)应用服务器
+web 服务器:Unix和Linux下，常用的Web服务器有Apache、Nginx、Lighttpd、Tomcat、IBM WebSphere、WebLogic 等，应用最广泛的是Apache。 
+web应用服务器: Tomcat服务器   IBM WebSphere   BEA WebLogic 
 
-
+高级java高并发，高性能，分布式，高可用，负载均衡，系统架构实战
+ 
 
 
 
