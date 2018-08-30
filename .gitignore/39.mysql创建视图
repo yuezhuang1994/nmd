@@ -1,0 +1,35 @@
+1.什么是视图
+  视图 view 是一张虚拟存在的表, 是一个逻辑表, 本身并不包含数据,作为一个select 语句保存在数据字典中的.
+  通过视图, 可以展现基表(创建视图的一张或者多张表) 的部分数据
+2.为什么要使用视图
+  简单 : 使用视图完全不用考虑后面对应的表的结构,关联关系,筛选条件, 对于用户来说是一个过滤好的复合条件的结果集
+  安全 : 使用视图的用户只能访问他们被允许查询的结果集.
+  数据独立 : 一旦视图结构确定了, 可以屏蔽表结构变化对用户的影响, 源表增加列对视图没有影响, 源表修改列名, 可以修改视图进行解决.
+  
+  保证数据安全, 提高查询效率
+
+3. 使用步骤
+  (1)创建视图
+    create or replace view 视图名称(列)
+      as select语句
+      with check option;
+  (2)单表上面创建视图
+    CREATE OR REPLACE VIEW  user_view(id  , phone , company_id)
+    AS SELECT id,phone,relation_company_id from `user`
+    WITH CHECK OPTION; 
+  (3)多表创建视图
+    CREATE OR REPLACE VIEW user_view1(id,name,position,phone)
+    AS SELECT u.id,up.name,up.position,u.phone from user u ,user_profile up where u.id=up.user_id and u.status='ACTIVE' limit 100
+    ;
+  (4) 多表无关联创建视图
+     CREATE OR REPLACE VIEW recruit_view (id , title)
+	     AS 
+      SELECT id as id  , title  as title from company_vendor_recruit  UNION   (SELECT id, title from wechat_needs) ;
+  注意:  不能再 as 后面加上 () 
+         视图源于基表, 修改基表的数据, 视图数据也会随之修改
+         
+         
+  
+  
+
+
