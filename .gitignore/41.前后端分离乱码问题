@@ -1,0 +1,2 @@
+1.控制器层
+@RequestMapping(value = "/admin/api/data_code" , produces = {"application/json; charset=UTF-8", "text/json; charset=UTF-8"})
