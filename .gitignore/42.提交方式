@@ -3,5 +3,8 @@ GET POST
 2.form中也又getpost 
   ajax 中也又getpost
 3.Spring 框架中自动进行对象的封装 , 参数 必须对应对象的属性
-  HTTPServletRequest 中 用 request . getParameter () 接受参数字符串 , 再自己进行转换
+     HttpServletRequest request,SysDataCodeForm codeForm
   
+  HTTPServletRequest 中 用 request . getParameter () 接受参数字符串 , 再自己进行转换
+    System.out.println(request.getParameter("params[0].name"));
+		System.out.println(request.getParameter("params[1].name"));
