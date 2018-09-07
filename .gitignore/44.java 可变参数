@@ -1,0 +1,7 @@
+public  String index(String str, Object... arg1){
+  
+}
+
+使用 index ("111",new String[]{"dfdf","dfdfdf"})
+
+总结 : 可变参数  可以 用数组来接收
