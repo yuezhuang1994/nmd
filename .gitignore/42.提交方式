@@ -8,3 +8,21 @@ GET POST
   HTTPServletRequest 中 用 request . getParameter () 接受参数字符串 , 再自己进行转换
     System.out.println(request.getParameter("params[0].name"));
 		System.out.println(request.getParameter("params[1].name"));
+
+4.常用的页面提交方式
+(1)
+常用的form提交, 页面会进行跳转 , 可以选择post/get 
+	    var form = document.getElementById(frm01);
+            form.action =<%=basePath %>test/productShow.action;
+            form.method = post;
+            form.submit();
+(2)
+拼接参数 在URL 后面, get方式  注意参数的保密性和长度限制
+window.location.href=<%=basePath%>test/productDetails.shtml?productId=+$(#productId).val() +&detailUrl=+$(#detailUrl).val() ;
+(3)
+ajax 提交form ,提交整个form 并且进行局部刷新, 也可以在方法中进行判断成功或者失败 , 再进行window.location.href 跳转
+(4)
+ajax拼接参数进行提交  相当于  URL后面拼接参数 , 局部刷新
+
+
+
