@@ -1,0 +1,9 @@
+1.加
+2.减
+3.乘
+
+4.除
+
+System.out.println(bigDecimal.divide(BigDecimal.valueOf(59) , 4 , RoundingMode.HALF_UP));
+
+保留四位小数
