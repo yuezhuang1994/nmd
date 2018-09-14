@@ -1,0 +1,9 @@
+1.正常情况下加注解@Transactional和try catch捕获异常会让注解失效
+2.解决办法
+加上 TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();//关键
+      try{
+        
+      }catch (Exception e){
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();//关键
+            return false;
+        }
