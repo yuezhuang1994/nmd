@@ -1,0 +1,20 @@
+jeesite表字段太多导致不能自动生成那张表的代码——————jetty 之 form too large | form too many keys 异常
+看了Jetty的源码才发现，jetty限制了Form提交数据的大小，该源码类来自jetty lib库下的jetty-server-7.6.16.v20140903.jar包下的
+
+org.eclipse.jetty.server.Request类，打开该类可以看到以下代码：
+
+ 
+
+解决方法：
+
+ 二是在web项目中的WEB-INF文件夹下新建一个jetty-web.xml文件
+
+            在jetty-web.xml 文件中添加以下内容：
+
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//DTD Configure//EN"
+"http://jetty.mortbay.org/configure.dtd">
+<Configure id="WebAppContext" class="org.eclipse.jetty.webapp.WebAppContext">
+<Set name="maxFormContentSize">60000</Set>
+<Set name="maxFormKeys">2000</Set>
+</Configure>
