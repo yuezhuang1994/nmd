@@ -81,7 +81,7 @@ public static void downloadExcel(HttpServletResponse response,Context context,St
         funcs.put("jxlsUtil", new JxlsUtil());    //添加自定义功能
         evaluator.getJexlEngine().setFunctions(funcs);
         jxlsHelper.processTemplate(context, transformer);
-	
+		
 注意
 在模板中添加批注作用
 1.在A1 单元格中加入 jx:area(lastCell="D3")  含义是 模板的区域由A1到D3
