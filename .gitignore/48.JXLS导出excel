@@ -2,7 +2,6 @@
   jxls是一个小型的java库,可以轻松的生成excel报告.
   java有很好的开源和商业库 用于创建excel文档(例如 POI java API),但是这是很低级的 
   jxls 将这种方法提升到更高的水平 .
-
 2.使用指南
 (1)添加依赖
 (2)使用特殊标记创建excel模板
@@ -41,11 +40,6 @@ List<Map<String, Object>> dataMapList = new ArrayList<>();
 	    	 dataMap.put("firstName", sysDataCodeModel.getFirstName());
 	    	 dataMap.put("firstAliasName", sysDataCodeModel.getFirstAliasName());
 	    	 dataMap.put("secondName", sysDataCodeModel.getSecondName());
-	    	 dataMap.put("secondAliasName", sysDataCodeModel.getSecondAliasName());
-	    	 dataMap.put("thirdName", sysDataCodeModel.getThirdName());
-	    	 dataMap.put("thirdAliasName", sysDataCodeModel.getThirdAliasName());
-	    	 dataMap.put("fourthName", sysDataCodeModel.getFourthName());
-	    	 dataMap.put("fourthAliasName", sysDataCodeModel.getFourthAliasName());
 dataMapList.add(dataMap);
 Context context = PoiTransformer.createInitialContext();
 context.putVar("dataMapList", dataMapList);
@@ -87,14 +81,13 @@ public static void downloadExcel(HttpServletResponse response,Context context,St
         funcs.put("jxlsUtil", new JxlsUtil());    //添加自定义功能
         evaluator.getJexlEngine().setFunctions(funcs);
         jxlsHelper.processTemplate(context, transformer);
-	  }
 	
 注意
 在模板中添加批注作用
 1.在A1 单元格中加入 jx:area(lastCell="D3")  含义是 模板的区域由A1到D3
 2.模板中写入 ${}  作用 : 之前 put 的 "键"
 3.jx:each(items="dataMapList" var="data" lastCell="AA3")   content 中putVar 的键   循环它
-
+4.JxlsUtil.downloadExcel(response, context, "demo.xls", "pmc_project.xls");	
 
 
 
