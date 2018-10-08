@@ -1,4 +1,4 @@
-1.介绍 
+1.介绍  jxls 2.3.0
   jxls是一个小型的java库,可以轻松的生成excel报告.
   java有很好的开源和商业库 用于创建excel文档(例如 POI java API),但是这是很低级的 
   jxls 将这种方法提升到更高的水平 .
