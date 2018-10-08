@@ -1,0 +1,103 @@
+1.介绍 
+  jxls是一个小型的java库,可以轻松的生成excel报告.
+  java有很好的开源和商业库 用于创建excel文档(例如 POI java API),但是这是很低级的 
+  jxls 将这种方法提升到更高的水平 .
+
+2.使用指南
+(1)添加依赖
+(2)使用特殊标记创建excel模板
+(3)使用api处理模板并 填充数据
+
+3.步骤
+(1) 添加依赖
+<dependency> <groupId> org.jxls </ groupId> <artifactId> jxls </ artifactId> <version> 2.4.6 </ version> </ dependency>
+
+或者 
+    <dependency>
+		    <groupId>org.jxls</groupId>
+		    <artifactId>jxls</artifactId>
+		    <version>2.3.0</version>
+		</dependency>
+ 		<dependency>
+		    <groupId>org.jxls</groupId>
+		    <artifactId>jxls-poi</artifactId>
+		    <version>1.0.9</version>
+		</dependency>
+		<dependency>
+		    <groupId>org.jxls</groupId>
+		    <artifactId>jxls-jexcel</artifactId>
+		    <version>1.0.6</version>
+		</dependency>
+(2)创建excel模板
+jexl默认情况下 jxls 使用 Apache 的 jexl作为表达式语言 , 可以在模板中用它来引用对象的属性和方法.
+
+单元格 A1 包含注释 ,jx：area（lastCell =“D4”）它将模板的根区域定义为A1：D4。
+单元格A4包含注释jx:each（items =“employees”var =“employee”lastCell =“D4”）每个命令的主体区域是A4：D4（由lastCell属性定义).
+
+(3) 使用api处理模板
+1. 项目中嵌入模板
+List<Map<String, Object>> dataMapList = new ArrayList<>();
+        Map<String, Object> dataMap = new HashMap<String, Object>();
+	    	 dataMap.put("firstName", sysDataCodeModel.getFirstName());
+	    	 dataMap.put("firstAliasName", sysDataCodeModel.getFirstAliasName());
+	    	 dataMap.put("secondName", sysDataCodeModel.getSecondName());
+	    	 dataMap.put("secondAliasName", sysDataCodeModel.getSecondAliasName());
+	    	 dataMap.put("thirdName", sysDataCodeModel.getThirdName());
+	    	 dataMap.put("thirdAliasName", sysDataCodeModel.getThirdAliasName());
+	    	 dataMap.put("fourthName", sysDataCodeModel.getFourthName());
+	    	 dataMap.put("fourthAliasName", sysDataCodeModel.getFourthAliasName());
+dataMapList.add(dataMap);
+Context context = PoiTransformer.createInitialContext();
+context.putVar("dataMapList", dataMapList);
+JxlsUtil.downloadExcel(response, context, "sysDataCodeInfo.xls", fileNamePart1 + "_" + fileNamePart2 + ".xls");
+
+//公共方法
+public static void downloadExcel(HttpServletResponse response,Context context,String templateName,String fileName){
+		long startTime=System.currentTimeMillis();
+		try {
+			InputStream is = JxlsUtil.class.getResourceAsStream("/jxlsTemplate/"+templateName);
+            response.setHeader("Content-Disposition", "attachment; filename=\"" + new String(fileName.getBytes("utf-8"),"iso-8859-1") + "\"");
+            response.setContentType("application/vnd.ms-excel");
+            JxlsHelper.getInstance().processTemplate(is, response.getOutputStream(), context);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		long endTime=System.currentTimeMillis(); //获取结束时间
+		System.out.println("程序运行时间： "+(endTime-startTime)+"ms");
+	}
+	2. 数据库中存入模板
+    /**
+		 * 从OSS获取模板
+		 */
+		File templateFile = fileService.getFileByName("jcOrderTemplate.xls");
+		byte[] inputBytes = fileStorage.get(templateFile.getUri());
+		ByteArrayInputStream inputStream = new ByteArrayInputStream(inputBytes);
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+
+		Context context = PoiTransformer.createInitialContext();
+     context.putVar("itemList", maps);
+     JxlsUtil.exportExcel(inputStream,outputStream,context);
+    
+    //公共方法
+     public static void exportExcel(InputStream is, OutputStream os,Context context) throws IOException{
+        JxlsHelper jxlsHelper = JxlsHelper.getInstance();
+        Transformer transformer  = jxlsHelper.createTransformer(is, os);
+        JexlExpressionEvaluator evaluator = (JexlExpressionEvaluator)transformer.getTransformationConfig().getExpressionEvaluator();
+        Map<String, Object> funcs = new HashMap<String, Object>();
+        funcs.put("jxlsUtil", new JxlsUtil());    //添加自定义功能
+        evaluator.getJexlEngine().setFunctions(funcs);
+        jxlsHelper.processTemplate(context, transformer);
+	  }
+	
+
+
+
+
+
+
+
+
+
+
+
+
