@@ -92,7 +92,7 @@ public static void downloadExcel(HttpServletResponse response,Context context,St
 Map<String,Object> supplierMap = getSupplierMap(jcOrderModel);
 直接 使用 context.putVar("supplierMap", supplierMap); 
 ${supplierMap.键}
-
+6.可以添加多个sheet  但是 sheet必须添加 批注
 
 
 
