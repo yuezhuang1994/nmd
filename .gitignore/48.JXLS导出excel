@@ -93,7 +93,7 @@ Map<String,Object> supplierMap = getSupplierMap(jcOrderModel);
 直接 使用 context.putVar("supplierMap", supplierMap); 
 ${supplierMap.键}
 6.可以添加多个sheet  但是 sheet必须添加 批注
-
+7.数据格式 : 键值对 或者 键值对集合
 
 
 
