@@ -88,7 +88,10 @@ public static void downloadExcel(HttpServletResponse response,Context context,St
 2.模板中写入 ${}  作用 : 之前 put 的 "键"
 3.jx:each(items="dataMapList" var="data" lastCell="AA3")   content 中putVar 的键   循环它
 4.JxlsUtil.downloadExcel(response, context, "demo.xls", "pmc_project.xls") 	不能出现中文
-
+5.可以不使用循环 
+Map<String,Object> supplierMap = getSupplierMap(jcOrderModel);
+直接 使用 context.putVar("supplierMap", supplierMap); 
+${supplierMap.键}
 
 
 
