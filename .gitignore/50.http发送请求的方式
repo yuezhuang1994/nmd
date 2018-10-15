@@ -1,0 +1,19 @@
+1.jquery
+$.get(url, data, callback)
+$.post(url, data, callback)
+
+2.
+$.ajax({
+		url:requestUrl,
+    type:'post', 
+    data:postData,
+    dataType:'json',
+		success: function (response) {
+			if(callFunc){
+				callFunc(response);
+			}
+		},
+    error: function (data, status, e){
+      showInfo("操作失败，请联系系统管理员协助处理");
+    }
+});
