@@ -1,0 +1,8 @@
+1.https://www.cnblogs.com/michaelShao/p/5983442.html
+
+2.关于maven工程下springmvc资源路径配置
+Java 源代码文件资源在Maven工程中的默认路径是: src/main/java，这个路径就是放置你的Java源代码文件。默认的路径是无需在Maven的pom.xml配置文件中指定的
+资源文件的缺省路径为src/main/resources，这样Maven在打包成war文件的时候，会将src/main/resources的资源文件复制到class目录。
+因此对于Spring mvc项目，servlet的配置文件springmvc-context.xml缺省会放置在 src/main/resources/springmvc-context.xml。
+对应的的web.xml指定的<param-value>classpath:springmvc-context.xml</param-value> 中，servlet的配置文件springmvc-context.xml 需要从 class目录下查找。
+
