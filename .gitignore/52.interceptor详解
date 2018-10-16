@@ -1,0 +1,62 @@
+1.配置文件
+<mvc:interceptors>
+        <mvc:interceptor>
+            <mvc:mapping path= "/front/company/**"/>
+            <!-- 获取分类参数 -->
+            <mvc:exclude-mapping path="/front/company/catalog/spec"/>
+            <mvc:exclude-mapping path="/front/company/catalog/catalog"/>
+            <bean class="com.hms.common.interceptor.LoginInterceptor" >
+            </bean>
+        </mvc:interceptor>
+        <mvc:interceptor>
+              <mvc:mapping path="/**"/>
+              <mvc:exclude-mapping path="/recource/**"/>       
+              <mvc:exclude-mapping path="/temple/**"/>
+              <mvc:exclude-mapping path="/swagger-ui.html"/>
+              <mvc:exclude-mapping path="/webjars/**"/>
+              <bean class="com.hms.common.interceptor.AvoidDuplicateSubmitInterceptor"/>
+      </mvc:interceptor>
+</mvc:interceptors>        
+
+注意: <mvc:mapping path="/**"/> 拦截所有请求
+<mvc:exclude-mapping path="/temple/**"/>  放开某个请求
+
+2.编写拦截器类
+1.通过实现HandlerInterceptor接口，或继承HandlerInterceptor接口的实现类（如HandlerInterceptorAdapter）来定义。
+2.通过实现WebRequestInterceptor接口，或继承WebRequestInterceptor接口的实现类来定义。
+
+
+public class OperateInterceptor extends HandlerInterceptorAdapter {
+
+	@Inject
+	private OperatorLogService operatorLogService;
+
+	@Override
+	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
+			throws Exception {
+		return true;
+	}
+
+	@Override
+	public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
+			ModelAndView modelAndView) throws Exception {
+		if (request.getSession() != null) {
+			Object ouid = request.getSession().getAttribute(UserContext.USER_ID_SESSION_ATTRIBUTE);
+			if (ouid != null) {
+				String uid = ouid.toString();
+				String url = request.getServletPath();
+				OperatorLog operatorLog = new OperatorLog();
+				operatorLog.setOperatorId(Long.valueOf(uid));
+				operatorLog.setOperatorUrl(url);
+				operatorLogService.save(operatorLog);
+			} else {
+//				System.out.println("-----OperateInterceptor:uid null----");
+			}
+		}
+	}
+
+	@Override
+	public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)
+			throws Exception {
+	}
+}
