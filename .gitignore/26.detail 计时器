@@ -72,7 +72,7 @@ if(otherProduct[5]){countDown(otherProduct[5].priceEndTime,function(msg){$(".oth
 不能进行循环, 否则会报错
 -- -----------------------------------------------------------------------
 setTimeOut(fn , time);  在指定的时间后只执行一次
-setIntevel(fn , time);  周期执行
+setInterval(fn , time);  周期执行
 
 
 
